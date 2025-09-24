@@ -17,16 +17,13 @@
 class Server
 {
 	private:
-		/**
-		 * da vedere quale ha piu' senso
-		 * che una tocca allocarla l'altra no
-		 * 
-		*/
 		std::string serv_name;
 		std::string root;
 		unsigned short port;
 		std::vector<struct pollfds> pollfds;
-		/**struct pollfd
+
+		/**
+		 * struct pollfd
 		 * {
 		 * 		int fd; -> fd del socket da aggiungere al poll()
 		 * 		short event; -> definisce l'azione da eseguire
@@ -49,17 +46,6 @@ class Server
 		 * prima che il tempo di attesa per un fd pronto
 		 * venga trovato.
 		 * 
-		 * dovrai farti una mappatura degli fd (ottenuti da socket() )
-		 * facenti parte di un server visto che un server puo' ascoltare
-		 * su piu' porte
-		 * 
-		 * 
-		 */
-		/***
-		 * 
-		 * servira' per sapere quali
-		 * fd sono server e quali no
-		 * in struct pollfd* pollfds
 		 * 
 		 */
 		
@@ -75,8 +61,6 @@ class Server
 			const	std::string	getRoot() const;
 			void	setName(std::string& name);
 			void	setPort(unsigned short& ports);
-
-			// TODO: decidere se passare struct pollfds o int fd
 			// macro = POLLIN, POLLOUT, POLLERR, POLLHUP
 			void	addPollFd(struct pollfds& pollfd);
 };
