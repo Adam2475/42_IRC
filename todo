@@ -1,3 +1,6 @@
+
+./ircserv <port> <password>
+
 - [ ] creare una connessione tra server e client con poll
 
 - [ ] crea i gestori dei segnali (Ctrl + D, C, Z)

@@ -3,7 +3,9 @@
 #include <iostream>
 #include <ostream>
 #include <fstream>
+#include <sstream>
 #include <string>
+#include <limits>
 #include <cstring>
 #include <cstdlib>
 #include <unistd.h>
@@ -11,16 +13,15 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <vector>
-#include <Client.hpp>
+#include "./Client.hpp"
 #include <map>
 
 class Server
 {
 	private:
-		std::string serv_name;
-		std::string root;
-		unsigned short port;
+		std::string serv_passwd;
 		std::vector<struct pollfds> pollfds;
+		unsigned short port;
 
 		/**
 		 * struct pollfd
@@ -57,12 +58,12 @@ class Server
 			~Server();
 			unsigned short getPort() const;
 			std::vector<struct pollfds> getPollFds() const;
-			const	std::string	getName() const;
-			const	std::string	getRoot() const;
-			void	setName(std::string& name);
+			const	std::string	getServPasswd() const;
+			void	setServPasswd(std::string& passwd);
 			void	setPort(unsigned short& ports);
 			// macro = POLLIN, POLLOUT, POLLERR, POLLHUP
 			void	addPollFd(struct pollfds& pollfd);
+			bool	strIsValidPort(const std::string& str);
 };
 
 #endif
