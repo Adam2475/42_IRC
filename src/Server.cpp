@@ -5,9 +5,9 @@ Server::Server(){}
 
 Server::Server(const Server& other) : serv_passwd(other.serv_passwd), port(other.port)
 {
-	for (size_t i = 0; i < other.pollfds.size(); i++)
+	for (size_t i = 0; i < other._pollfd.size(); i++)
 	{
-		pollfds.push_back(other.pollfds[i]);
+		_pollfd.push_back(other._pollfd[i]);
 	}
 }
 
@@ -16,9 +16,9 @@ Server& Server::operator=(const Server& other)
 	if (this != &other)
 	{
 		serv_passwd = other.serv_passwd;
-		for (size_t i = 0; i < other.pollfds.size(); i++)
+		for (size_t i = 0; i < other._pollfd.size(); i++)
 		{
-			pollfds.push_back(other.pollfds[i]);
+			_pollfd.push_back(other._pollfd[i]);
 		}
 		port = other.port;
 	}
@@ -34,9 +34,9 @@ unsigned short Server::getPort() const
 	return port;
 }
 
-std::vector<struct pollfds> Server::getPollFds() const
+std::vector<struct pollfd> Server::getPollFd() const
 {
-	return pollfds;
+	return _pollfd;
 }
 
 const std::string Server::getServPasswd() const
@@ -58,10 +58,21 @@ void Server::setPort(unsigned short& new_port)
 
 // Necessary functions
 
-void Server::addPollFd(struct pollfds& pollfd)
+/**
+ * On going
+ * 
+ * it will be used to add pollfds to the vector
+ * 
+ */
+
+void Server::addPollFd(struct pollfd& pollfd)
 {
-	pollfds.push_back(pollfd);
+	this->_pollfd.push_back(pollfd);
 }
+
+// Check if the argument passed is an 
+// unsigned short and in beetween the valid
+// limits for a port, and then set the new port value
 
 bool Server::strIsValidPort(const std::string& str)
 {

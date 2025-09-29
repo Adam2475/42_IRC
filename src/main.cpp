@@ -8,6 +8,7 @@ int errorBuilder(std::string strerr)
 
 int main(int ac, char *av[])
 {
+	// Parser
 	if (ac != 3)
 		return errorBuilder("Wrong argument count!");
 
@@ -18,5 +19,6 @@ int main(int ac, char *av[])
 		return errorBuilder("Not a valid port!");
 	irc_serv.setServPasswd(arg_psswd);
 
+	
 	return 0;
 }

@@ -20,7 +20,7 @@ class Server
 {
 	private:
 		std::string serv_passwd;
-		std::vector<struct pollfds> pollfds;
+		std::vector<struct pollfd> _pollfd;
 		unsigned short port;
 
 		/**
@@ -57,12 +57,12 @@ class Server
 			Server& operator=(const Server& other);
 			~Server();
 			unsigned short getPort() const;
-			std::vector<struct pollfds> getPollFds() const;
+			std::vector<struct pollfd> getPollFd() const;
 			const	std::string	getServPasswd() const;
 			void	setServPasswd(std::string& passwd);
 			void	setPort(unsigned short& ports);
 			// macro = POLLIN, POLLOUT, POLLERR, POLLHUP
-			void	addPollFd(struct pollfds& pollfd);
+			void	addPollFd(struct pollfd& pollfd);
 			bool	strIsValidPort(const std::string& str);
 };
 
