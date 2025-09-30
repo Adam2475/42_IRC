@@ -1,0 +1,12 @@
+
+./ircserv <port> <password>
+
+- [ ] creare una connessione tra server e client con poll
+
+- [ ] crea i gestori dei segnali (Ctrl + D, C, Z)
+
+- [ ] inizia la creazione e registrazione dei client (NICK, USER, PASS)
+
+- [ ] Add the server commands (PING, OPER, KILL...) 
+
+- [ ] Add the channel operations commands (JOIN, PART, INVITE, KICK, PRIVMSG, NOTICE...)
