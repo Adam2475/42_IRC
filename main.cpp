@@ -1,4 +1,5 @@
 #include "header.hpp"
+#include "Server.hpp"
 
 int main(int ac, char **av, char **envp)
 {
@@ -12,8 +13,18 @@ int main(int ac, char **av, char **envp)
     short int port = atoi(av[1]);
     std::string password = av[2];
 
-    if (server_start(port, password, envp))
-        return (1);
+    // if (server_start(port, password, envp))
+    //     return (1);
+
+    try
+    {
+        Server server(port, password, envp);
+        server.server_start();
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << "error initializing the server";
+    }
 
     return (0);
 }

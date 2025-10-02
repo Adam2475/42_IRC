@@ -1,5 +1,6 @@
 #include "header.hpp"
  #include <netdb.h>
+#include "Server.hpp"
 
 /*
 struct sockaddr_in {
@@ -13,6 +14,10 @@ struct in_addr {
     unsigned long s_addr;  // load with inet_aton()
 };
 */
+
+Server::Server(short int port, std::string password, char **envp) : port(port), password(password), envp(envp) {
+
+}
 
 static void accept_connections(int sockfd)
 {
@@ -135,7 +140,7 @@ static std::string get_ip_addr(char **env)
 	return (IP);
 }
 
-int server_start(int port, std::string password, char **envp)
+int Server::server_start()
 {
     int sockfd = -1;
     sockaddr_in srvAddr;
