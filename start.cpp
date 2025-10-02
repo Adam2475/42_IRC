@@ -58,33 +58,54 @@ static void accept_connections(int sockfd)
             return ;
         }
 
+        // std::cout << "clients : " << clients << std::endl;
 
-        clientSocket = accept(sockfd, (struct sockaddr*)&client_addr, &client_addr_len);
-
-        // if there is a new connection accept it
-        if (clientSocket > 0)
+        if (poll_fds[0].revents & POLLIN)
         {
-            std::cout << "new connection accepted" << std::endl;
-            data.fd = clientSocket;
-            data.events = POLLIN;
-            data.revents = 0;
-            // add new client to poll_fds
-            poll_fds.push_back(data);
-            // increment total clients
-            clients++;
+             std::cout << "New connection incoming..." << std::endl;
+            clientSocket = accept(sockfd, (struct sockaddr*)&client_addr, &client_addr_len);
+    
+            // if there is a new connection accept it
+            if (clientSocket > 0)
+            {
+                std::cout << "new connection accepted" << std::endl;
+                data.fd = clientSocket;
+                data.events = POLLIN;
+                data.revents = 0;
+                // add new client to poll_fds
+                poll_fds.push_back(data);
+                // increment total clients
+                clients++;
+            }
+
         }
 
-        for (; clients >= pClients; pClients++)
+        // skip the listening socket, check all clients
+        for (int i = 1; i < (int)poll_fds.size(); i++)
         {
-            clientSocket = poll_fds[pClients].fd;
-            bzero(buffer, 1024);
-            status = recv(poll_fds[pClients].fd, buffer, sizeof(buffer), 0);
-
-            if (status > 0)
+            if (poll_fds[i].revents & POLLIN)
             {
-                buffer[status] = '\0'; // Null terminate the string
-                std::cout << "Message from client " << clientSocket 
-                          << ": " << buffer << std::endl;
+                clientSocket = poll_fds[i].fd;
+                bzero(buffer, 1024);
+                status = recv(poll_fds[i].fd, buffer, sizeof(buffer) - 1, 0);
+    
+                if (status > 0)
+                {
+                    buffer[status] = '\0'; // Null terminate the string
+                    std::cout << "Message from client " << clientSocket 
+                              << ": " << buffer << std::endl;
+    
+                    // i--;
+                    // continue;
+                }
+                else if (status == 0)  // ADD: Handle client disconnection
+                {
+                    std::cout << "Client " << clientSocket << " disconnected" << std::endl;
+                    close(poll_fds[i].fd);
+                    poll_fds.erase(poll_fds.begin() + i);
+                    clients--;
+                    i--; // Adjust index after erasing
+                }
             }
         }
     }
