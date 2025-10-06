@@ -9,12 +9,9 @@ int main(int ac, char **av, char **envp)
         return (1);
     }
 
-    // perform parsing on port number
+    // TODO: perform parsing on port number
     short int port = atoi(av[1]);
     std::string password = av[2];
-
-    // if (server_start(port, password, envp))
-    //     return (1);
 
     try
     {
@@ -23,7 +20,7 @@ int main(int ac, char **av, char **envp)
     }
     catch(const std::exception& e)
     {
-        std::cerr << "error initializing the server";
+        std::cerr << "error initializing the server" << e.what() << std::endl;
     }
 
     return (0);

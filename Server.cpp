@@ -159,16 +159,14 @@ int Server::server_start()
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sockfd < 0)
 	{
-		std::cerr << "failed to create socket" << std::endl;
-		return (1);
+		throw std::runtime_error("failed to create socket");
 	}
 
 	// binding socket to address & port
 	if (bind(sockfd, (sockaddr *)&srvAddr, sizeof(srvAddr)) < 0)
 	{
-		std::cerr << "failed binding the socket" << std::endl;
 		close(sockfd);
-		return (1);
+		throw std::runtime_error("failed binding the socket");
 	}
 	std::cout << "socket created and bound successfully" << std::endl;
 
