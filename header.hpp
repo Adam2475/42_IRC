@@ -6,6 +6,8 @@
 #include <iostream>
 #include <string> // for string type
 #include <vector>
+#include <deque>
+#include <map>
 
 #include <unistd.h> // for atoi
 #include <fcntl.h>  // for fcntl(), F_GETFL, F_SETFL, O_NONBLOCK
@@ -18,6 +20,8 @@
 #include <sys/socket.h> // for bind() & socket() & listen() & accept()
 
 #include <poll.h>
+// #include "User.hpp"
+// #include "Channel.hpp"
 
 int server_start(int port, std::string password, char **envp);
 

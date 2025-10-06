@@ -4,7 +4,7 @@ CC = c++
 # -Wall -Wextra -Werror
 CFLAGS = -std=c++98
 
-SRCS = ./main.cpp ./start.cpp
+SRCS = ./main.cpp ./Server.cpp
 OBJS = $(SRCS:.cpp=.o)
 
 all: $(NAME)
