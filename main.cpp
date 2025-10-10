@@ -15,6 +15,7 @@ int main(int ac, char **av, char **envp)
 
     try
     {
+        std::cout << password << " " << av[1] << " " << av[2] << std::endl;
         Server server(port, password, envp);
         server.server_start();
     }

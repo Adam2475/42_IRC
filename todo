@@ -1,5 +1,6 @@
 - [ ] start server e registrazione dei client
 - [ ] scrittura primi User su page principale
+- [ ] aggiungere accept_connection in server.hpp
 - [ ] creare una funzione di scrittura messaggi del server e altri
 - [ ] creazione channel
 - [ ] creazione specifiche channel: topic, invite only, operators ecc..

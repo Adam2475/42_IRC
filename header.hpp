@@ -1,9 +1,10 @@
-#pragma once
+// #pragma once
 
 #ifndef HEADER_HPP
 #define HEADER_HPP
 
 #include <iostream>
+#include <sstream>
 #include <string> // for string type
 #include <vector>
 #include <deque>
@@ -20,8 +21,8 @@
 #include <sys/socket.h> // for bind() & socket() & listen() & accept()
 
 #include <poll.h>
-// #include "User.hpp"
-// #include "Channel.hpp"
+#include "User.hpp"
+#include "Channel.hpp"
 
 int server_start(int port, std::string password, char **envp);
 
