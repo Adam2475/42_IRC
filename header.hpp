@@ -24,6 +24,8 @@
 #include "User.hpp"
 #include "Channel.hpp"
 
-int server_start(int port, std::string password, char **envp);
+// int server_start(int port, std::string password, char **envp);
+int strlen(const char *str);
+bool	isStrNotAlphaNum(const char *str);
 
 #endif

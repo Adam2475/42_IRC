@@ -1,0 +1,24 @@
+#include "header.hpp"
+
+int strlen(const char *str)
+{
+	if (!str)
+		return -1;
+	int i = 0;
+	while (str[i])
+		i++;
+	return i;
+}
+
+bool	isStrNotAlphaNum(const char *str)
+{
+	int size = strlen(str);
+	if (size < 0)
+		return 1;
+	for (size_t i = 0; i < strlen(str); i++)
+	{
+		if (!std::isalnum(static_cast<unsigned char>(str[i])) && str[i] != '\n')
+			return 1;
+	}
+	return 0;
+}

@@ -30,6 +30,7 @@ class Server
 		void accept_connections();
 		std::vector<User> getUserVector() const;
 		std::string findNickName(int clientFd) const;
+		std::string sendReceive(int clientSocket, std::string& message);
 };
 
 

@@ -2,18 +2,6 @@
  #include <netdb.h>
 #include "Server.hpp"
 
-/*
-struct sockaddr_in {
-	short            sin_family;   // e.g. AF_INET
-	unsigned short   sin_port;     // e.g. htons(3490)
-	struct in_addr   sin_addr;     // see struct in_addr, below
-	char             sin_zero[8];  // zero this if you want to
-};
-
-struct in_addr {
-	unsigned long s_addr;  // load with inet_aton()
-};
-*/
 Server::Server() {}
 
 Server::Server(short int port, std::string password, char **envp) : port(port), password(password), envp(envp)
@@ -22,29 +10,6 @@ Server::Server(short int port, std::string password, char **envp) : port(port), 
 	pClients = 0;
 	status = 0;
 	serv_fd = -1;
-}
-
-int strlen(const char *str)
-{
-	if (!str)
-		return -1;
-	int i = 0;
-	while (str[i])
-		i++;
-	return i;
-}
-
-bool	isStrNotAlphaNum(const char *str)
-{
-	int size = strlen(str);
-	if (size < 0)
-		return 1;
-	for (size_t i = 0; i < strlen(str); i++)
-	{
-		if (!std::isalnum(static_cast<unsigned char>(str[i])) && str[i] != '\n')
-			return 1;
-	}
-	return 0;
 }
 
 int Server::checkPassword(int clientSocket)
@@ -56,7 +21,7 @@ int Server::checkPassword(int clientSocket)
 	n = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
 	std::string received;
 
-
+	// TODO : forse metterre un limite di caratteri da aggiungere a 1024
 	if (n <= 0)
 		return (1);
 	buffer[n] = '\0';
@@ -70,25 +35,24 @@ int Server::checkPassword(int clientSocket)
 	if (received != password)
 	{
 		std::cout << received << " wrong password inputted, closing... " << password << " no password"<< std::endl;
-		send(clientSocket, "Wrong password: \n", 18, 0);
+		send(clientSocket, "Wrong password!", 16, 0);
 		return (1);
 	}
-	password = received;
 	return (0);
 }
 
-std::string sendReceive(int clientSocket, std::string& message)
+std::string Server::sendReceive(int clientSocket, std::string& message)
 {
 	std::string msg;
-	ssize_t n;
+	int n;
 	char buffer[1024];
 	
-	msg += "Set ";
-	msg += message;
-	msg += " :";
+	std::cout << "entro" << std::endl;
+	msg += "Set " + message + " :\n";
 	send(clientSocket, msg.c_str(), msg.size(), 0);
 	bzero(buffer, sizeof(buffer));
 	n = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
+	// TODO: aggiungere un keep_reading per n maggiori di 1024
 	if (n <= 0)
 	{
 		static std::string empty;
@@ -96,22 +60,47 @@ std::string sendReceive(int clientSocket, std::string& message)
 		send(clientSocket, msg.c_str(), msg.size(), 0);
 		return empty;
 	}
-	// Trim trailing CR/LF that clients (nc) send on Enter
-	while (n > 0 && (buffer[n - 1] == '\n' || buffer[n - 1] == '\r'))
+	if (buffer[0] == '\r' && buffer[1] == '\n' && n > 1)
 	{
-		buffer[n - 1] = '\0';
-		n--;
+		bzero(buffer, 2);
+		n = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
+		// TODO: aggiungere un keep_reading per n maggiori di 1024
+		if (n <= 0)
+		{
+			static std::string empty;
+			msg = "Wrong " + message + "!";
+			send(clientSocket, msg.c_str(), msg.size(), 0);
+			return empty;
+		}
 	}
-	buffer[n] = '\0';
-	std::string received(buffer);
-	if (received.empty() || isStrNotAlphaNum(received.c_str()))
+	std::string try1;
+	int i = 0;
+	while (std::isprint(buffer[i]))
 	{
-		static std::string empty;
-		msg = "Wrong " + message + "!\n";
-		send(clientSocket, msg.c_str(), msg.size(), 0);
-		return empty;
+		try1 += buffer[i];
+		i++;
 	}
-	return received;
+	// try1 += '\0';
+	printf("sono buff %s %i %s ciao\n", buffer, n, message.c_str());
+	std::cout << try1 << std::endl;
+	// // if (n > 0)
+	// // 	buffer[n - 1] = '\0';
+	// // else
+	// 	buffer[n] = '\0';
+	// printf("sono buff %s %i ciao 2\n", buffer, n);
+	// // Trim trailing CR/LF that clients (nc) send on Enter
+	// while (n > 0 && (buffer[n - 1] == '\n' || buffer[n - 1] == '\r'))
+	// {
+	// 	std::cout << "entro 2 " << message << std::endl;
+	// 	buffer[n - 1] = '\0';
+	// 	n--;
+	// }
+	// std::string received(buffer);
+	if (try1.empty() || isStrNotAlphaNum(try1.c_str()))
+	{
+		return this->sendReceive(clientSocket, message);
+	}
+	return try1;
 }
 
 User Server::userCreation(int clientSocket)
@@ -135,6 +124,7 @@ User Server::userCreation(int clientSocket)
 			user = "username";
 			continue;
 		}
+		std::cout << password << ' ' << nick << ' ' << user << std::endl;
 		flag = true;
 	}
 	return User(user, nick, clientSocket);
