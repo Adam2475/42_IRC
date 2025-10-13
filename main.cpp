@@ -1,5 +1,8 @@
 #include "header.hpp"
 #include "Server.hpp"
+#include <limits.h>
+#include <stdlib.h>
+
 
 int main(int ac, char **av, char **envp)
 {
@@ -10,7 +13,18 @@ int main(int ac, char **av, char **envp)
     }
 
     // TODO: perform parsing on port number
-    short int port = atoi(av[1]);
+    // Range: The range of port numbers is 0 to 65535. 
+    // limit is the range of unsigned short
+    char *end;
+    long int port_long = strtol(av[1], &end, 10);
+    if (*end != '\0' || port_long < 0 || port_long >= 65535)
+    {
+        std::cerr << "invalid port number" << std::endl;
+        return (1);
+    }
+
+    unsigned short port = static_cast<unsigned short>(port_long);
+
     std::string password = av[2];
 
     try
