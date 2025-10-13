@@ -1,8 +1,7 @@
 #include "header.hpp"
 #include "Server.hpp"
 #include <limits.h>
-#include <stdlib.h>
-
+#include <cstdlib> 
 
 int main(int ac, char **av, char **envp)
 {
@@ -16,7 +15,7 @@ int main(int ac, char **av, char **envp)
     // Range: The range of port numbers is 0 to 65535. 
     // limit is the range of unsigned short
     char *end;
-    long int port_long = strtol(av[1], &end, 10);
+    long int port_long = std::strtol(av[1], &end, 10);
     if (*end != '\0' || port_long < 0 || port_long >= 65535)
     {
         std::cerr << "invalid port number" << std::endl;

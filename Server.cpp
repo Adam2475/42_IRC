@@ -175,7 +175,7 @@ void Server::accept_connections()
 				std::cout << "new connection accepted" << std::endl;   
 				User new_user = this->userCreation(clientSocket);
 				_users.push_back(new_user);
-				std::cout << buffer;
+				std::cout << buffer << "user created successfully";
 				// add new client to poll_fds
 				poll_fds.push_back(new_user.getPollFd());
 				// increment total clients
@@ -183,7 +183,7 @@ void Server::accept_connections()
 			}
 		}
 
-		// skip the listening socket, check all clients
+		// skip the listening socket, check all clients for messages
 		for (int i = 1; i < (int)poll_fds.size(); i++)
 		{
 			if (poll_fds[i].revents & POLLIN)
@@ -191,7 +191,6 @@ void Server::accept_connections()
 				clientSocket = poll_fds[i].fd;
 				bzero(buffer, 1024);
 				status = recv(poll_fds[i].fd, buffer, sizeof(buffer) - 1, 0);
-
 	
 				if (status > 0)
 				{
