@@ -192,15 +192,34 @@ void Server::accept_connections()
 				bzero(buffer, 1024);
 				status = recv(poll_fds[i].fd, buffer, sizeof(buffer) - 1, 0);
 	
-				if (status > 0)
-				{
-					buffer[status] = '\0'; // Null terminate the string
-					std::cout << "Message from client " << clientSocket << ' ' << this->findNickName(clientSocket)
-							  << ": " << buffer << std::endl;
-	
-					// i--;
-					// continue;
-				}
+                if (status > 0)
+                {
+                    buffer[status] = '\0'; // Null terminate the string
+
+                    std::string line(buffer);
+
+                    while (!line.empty() && (line[line.size() - 1] == '\n' || line[line.size() - 1] == '\r'))
+                        line.resize(line.size() - 1);
+
+                    std::string cmd;
+                    size_t sp = line.find(' ');
+                    if (sp == std::string::npos)
+                        cmd = line;
+                    else
+                        cmd = line.substr(0, sp);
+
+                    std::cout << "Message from client " << clientSocket << ' ' << this->findNickName(clientSocket)
+                              << ": " << line << std::endl;
+
+                    // command recognition
+                    if (cmd == "JOIN")
+                    {
+                        std::cout << "Detected JOIN command from fd " << clientSocket << std::endl;
+                        // call logic for join
+                        const char *ack = "NOTICE :JOIN received\r\n";
+                        send(clientSocket, ack, strlen(ack), 0);
+                    }
+                }
 				else if (status == 0)  // ADD: Handle client disconnection
 				{
 					std::cout << "Client " << clientSocket << " disconnected" << std::endl;
