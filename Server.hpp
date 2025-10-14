@@ -3,6 +3,9 @@
 
 #include "header.hpp"
 #include "User.hpp"
+#define PASS "PASS"
+#define NICK "NICK"
+#define USER "USER"
 
 class Server
 {
@@ -18,7 +21,7 @@ class Server
 		char        **envp;
 		// std::vector<Channel>	_channels;
 		std::vector<User>    	_users;
-		int	checkPassword(int clientSocket);
+		// int	checkPassword(int clientSocket);
 	public:
 		Server();
 		Server(short int port, std::string password, char **envp);
@@ -30,7 +33,8 @@ class Server
 		void accept_connections();
 		std::vector<User> getUserVector() const;
 		std::string findNickName(int clientFd) const;
-		std::string sendReceive(int clientSocket, std::string& message);
+		std::string sendReceive(int clientSocket, std::string message);
+		void statusPrint(int i, int clientSocket);
 };
 
 

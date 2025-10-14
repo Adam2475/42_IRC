@@ -12,123 +12,192 @@ Server::Server(short int port, std::string password, char **envp) : port(port), 
 	serv_fd = -1;
 }
 
-int Server::checkPassword(int clientSocket)
-{
-	char buffer[1024];
-	ssize_t n;
-	send(clientSocket, "Set password: \n", 16, 0);
-	bzero(buffer, sizeof(buffer));
-	n = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
-	std::string received;
+// int Server::checkPassword(int clientSocket)
+// {
+// 	char buffer[512];
+// 	ssize_t n;
+// 	// send(clientSocket, "Set password: \n", 16, 0);
+// 	bzero(buffer, sizeof(buffer));
+// 	n = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
+// 	std::string received;
 
-	// TODO : forse metterre un limite di caratteri da aggiungere a 1024
-	if (n <= 0)
-		return (1);
-	buffer[n] = '\0';
-	// Trim trailing CR/LF that clients (nc) send on Enter
-	while (n > 0 && (buffer[n - 1] == '\n' || buffer[n - 1] == '\r'))
-	{
-		buffer[n - 1] = '\0';
-		n--;
-	}
-	received = buffer;
-	if (received != password)
-	{
-		std::cout << received << " wrong password inputted, closing... " << password << " no password"<< std::endl;
-		send(clientSocket, "Wrong password!", 16, 0);
-		return (1);
-	}
-	return (0);
-}
+// 	// TODO : forse metterre un limite di caratteri da aggiungere a 1024
+// 	if (n <= 0 || n > 512)
+// 		return (1);
+// 	buffer[n] = '\0';
+// 	// Trim trailing CR/LF that clients (nc) send on Enter
+// 	while (n > 0 && (buffer[n - 1] == '\n' || buffer[n - 1] == '\r'))
+// 	{
+// 		buffer[n - 1] = '\0';
+// 		n--;
+// 	}
+// 	received = buffer;
+// 	if (received.compare("PASS") != 0)
+// 		return send(clientSocket, "Wrong command!\n", 16, 0), 1;
+// 	if (received != password)
+// 	{
+// 		std::cout << received << " wrong password inputted, closing... " << password << " no password"<< std::endl;
+// 		send(clientSocket, "Wrong password!", 16, 0);
+// 		return (1);
+// 	}
+// 	return (0);
+// }
 
-std::string Server::sendReceive(int clientSocket, std::string& message)
+// std::string Server::sendReceive(int clientSocket, std::string& message)
+// {
+// 	std::string msg;
+// 	int n;
+// 	char buffer[512];
+	
+// 	// std::cout << "entro" << std::endl;
+// 	msg += "Set " + message + " :\n";
+// 	send(clientSocket, msg.c_str(), msg.size(), 0);
+// 	bzero(buffer, sizeof(buffer));
+// 	n = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
+// 	// TODO: aggiungere un keep_reading per n maggiori di 1024
+// 	if (n <= 0 || n > 512)
+// 	{
+// 		static std::string empty;
+// 		msg = "Wrong " + message + "!";
+// 		send(clientSocket, msg.c_str(), msg.size(), 0);
+// 		return empty;
+// 	}
+// 	if (buffer[0] == '\r' && buffer[1] == '\n' && n > 1)
+// 	{
+// 		bzero(buffer, 2);
+// 		n = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
+// 		// TODO: aggiungere un keep_reading per n maggiori di 1024
+// 		if (n <= 0)
+// 		{
+// 			static std::string empty;
+// 			msg = "Wrong " + message + "!";
+// 			send(clientSocket, msg.c_str(), msg.size(), 0);
+// 			return empty;
+// 		}
+// 	}
+// 	std::string try1;
+// 	int i = 0;
+// 	while (std::isprint(buffer[i]))
+// 	{
+// 		try1 += buffer[i];
+// 		i++;
+// 	}
+// 	// std::cout << try1 << std::endl;
+// 	if (try1.empty() || isStrNotAlphaNum(try1.c_str()))
+// 	{
+// 		return this->sendReceive(clientSocket, message);
+// 	}
+// 	return try1;
+// }
+
+std::string Server::sendReceive(int clientSocket, std::string message)
 {
 	std::string msg;
 	int n;
-	char buffer[1024];
+	char buffer[512];
 	
-	std::cout << "entro" << std::endl;
-	msg += "Set " + message + " :\n";
-	send(clientSocket, msg.c_str(), msg.size(), 0);
 	bzero(buffer, sizeof(buffer));
-	n = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
-	// TODO: aggiungere un keep_reading per n maggiori di 1024
+	n = recv(clientSocket, buffer, sizeof(buffer), 0);
+	std::string received(buffer);
+	size_t pos = 0;
+	while (received.find_first_of("\r\n") == std::string::npos)
+	{
+		bzero(buffer, sizeof(buffer));
+		n = recv(clientSocket, buffer, sizeof(buffer), 0);
+		received += buffer;
+	}
+	
+	if(clearStrCRFL(received))
+	{
+		static std::string empty;
+		return empty;
+	}
+	if (received.compare(message) != 0)
+	{
+		std::cout << message << " != " << received << std::endl;
+		static std::string empty;
+		msg = "Wrong command! Required " + message + " command!\n";
+		send(clientSocket, msg.c_str(), msg.size(), 0);
+		return empty;
+	}	
+	bzero(buffer, sizeof(buffer));
+	n = recv(clientSocket, buffer, sizeof(buffer), 0);
+	buffer[n] = '\0';
 	if (n <= 0)
 	{
 		static std::string empty;
-		msg = "Wrong " + message + "!";
-		send(clientSocket, msg.c_str(), msg.size(), 0);
 		return empty;
 	}
-	if (buffer[0] == '\r' && buffer[1] == '\n' && n > 1)
+	received.erase(0, received.size());
+	received = buffer;
+	std::cout << "entro " << n << " " << received << std::endl;
+	if(clearStrCRFL(received))
 	{
-		bzero(buffer, 2);
-		n = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
-		// TODO: aggiungere un keep_reading per n maggiori di 1024
-		if (n <= 0)
+		static std::string empty;
+		return empty;
+	}
+	if (message.compare("PASS") == 0)
+	{
+		if (received.compare(password) != 0)
 		{
+			std::cout << password << ' ' << received;
 			static std::string empty;
-			msg = "Wrong " + message + "!";
+			msg = "Wrong password!\n";
 			send(clientSocket, msg.c_str(), msg.size(), 0);
 			return empty;
 		}
+		else if (received.compare(password) == 0)
+			return received;
+		else
+		{
+			std::string empty;
+			return empty;
+		}
 	}
-	std::string try1;
-	int i = 0;
-	while (std::isprint(buffer[i]))
+	else if (isStrNotPrintable(received.c_str()))
 	{
-		try1 += buffer[i];
-		i++;
+		static std::string empty;
+		msg = "Insert a valid " + message + "!";
+		send(clientSocket, msg.c_str(), msg.size(), 0);
+		return empty;
 	}
-	// try1 += '\0';
-	printf("sono buff %s %i %s ciao\n", buffer, n, message.c_str());
-	std::cout << try1 << std::endl;
-	// // if (n > 0)
-	// // 	buffer[n - 1] = '\0';
-	// // else
-	// 	buffer[n] = '\0';
-	// printf("sono buff %s %i ciao 2\n", buffer, n);
-	// // Trim trailing CR/LF that clients (nc) send on Enter
-	// while (n > 0 && (buffer[n - 1] == '\n' || buffer[n - 1] == '\r'))
-	// {
-	// 	std::cout << "entro 2 " << message << std::endl;
-	// 	buffer[n - 1] = '\0';
-	// 	n--;
-	// }
-	// std::string received(buffer);
-	if (try1.empty() || isStrNotAlphaNum(try1.c_str()))
-	{
-		return this->sendReceive(clientSocket, message);
-	}
-	return try1;
+	return received;
 }
 
 User Server::userCreation(int clientSocket)
 {
 	bool flag = false;
-	std::string nick("nickname");
-	std::string user("username");
+	std::string pass;
+	std::string nick;
+	std::string user;
 	while (!flag)
 	{
-		if (checkPassword(clientSocket))
+		pass = sendReceive(clientSocket, PASS);
+		if (pass.empty())
 			continue;
-		nick = sendReceive(clientSocket, nick);
+		else if (pass == password)
+			std::cout << "correct password\n";
+		nick = sendReceive(clientSocket, NICK);
 		if (nick.empty())
-		{
-			nick = "nickname";
 			continue;
-		}
-		user = sendReceive(clientSocket, user);
+		user = sendReceive(clientSocket, USER);
 		if (user.empty())
-		{
-			user = "username";
 			continue;
-		}
 		std::cout << password << ' ' << nick << ' ' << user << std::endl;
 		flag = true;
 	}
 	return User(user, nick, clientSocket);
 }
+
+void Server::statusPrint(int i, int clientSocket)
+{
+	std::cout << "Client " << clientSocket << " disconnected" << std::endl;
+	close(poll_fds[i].fd);
+	poll_fds.erase(poll_fds.begin() + i);
+	_users.erase(_users.begin() + i);
+	clients--;
+}
+
 
 void Server::accept_connections()
 {
@@ -191,11 +260,23 @@ void Server::accept_connections()
 				clientSocket = poll_fds[i].fd;
 				bzero(buffer, 1024);
 				status = recv(poll_fds[i].fd, buffer, sizeof(buffer) - 1, 0);
-
-	
+				// TODO : se il messaggio supera i 1024 char te lo tronca in più messaggi
 				if (status > 0)
 				{
 					buffer[status] = '\0'; // Null terminate the string
+					std::string buf(buffer);
+					while (isStrNotPrintable(buffer) && status > 0)
+					{
+						send(clientSocket, "Just alpha numeric chars please!\n", 34, 0);
+						bzero(buffer, 1024);
+						status = recv(poll_fds[i].fd, buffer, sizeof(buffer) - 1, 0);
+					}
+					if (status <= 0)
+					{
+						statusPrint(i, clientSocket);
+						i--;
+						continue;
+					}
 					std::cout << "Message from client " << clientSocket << ' ' << this->findNickName(clientSocket)
 							  << ": " << buffer << std::endl;
 	
@@ -204,11 +285,7 @@ void Server::accept_connections()
 				}
 				else if (status == 0)  // ADD: Handle client disconnection
 				{
-					std::cout << "Client " << clientSocket << " disconnected" << std::endl;
-					close(poll_fds[i].fd);
-					poll_fds.erase(poll_fds.begin() + i);
-					_users.erase(_users.begin() + i);
-					clients--;
+					statusPrint(i, clientSocket);
 					i--; // Adjust index after erasing
 				}
 			}
