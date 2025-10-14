@@ -6,6 +6,36 @@
 #define PASS "PASS"
 #define NICK "NICK"
 #define USER "USER"
+#define PRIVMSG "PRIVMSG"
+#define JOIN "JOIN"
+#define MODE "MODE"
+/**
+ * es. MODE #channel +i
+ *
+ *  | Mode | Descrizione                          | Parametro richiesto |
+	| ---- | ------------------------------------ | ------------------- |
+	| `i`  | Invite-only                          | ❌                  |
+	| `t`  | Topic modificabile solo da operatori | ❌                  |
+	| `k`  | Imposta password del canale          | ✅ password         |
+	| `o`  | Aggiunge/rimuove operatore           | ✅ nickname         |
+	| `l`  | Limita numero di utenti              | ✅ numero           |
+
+	| Comando         | Scopo                                              | Esempio                              |
+	| --------------- | -------------------------------------------------- | ------------------------------------ |
+	| **JOIN**        | entra in un canale                                 | `JOIN #chat`                         |
+	| **PART**        | esce da un canale                                  | `PART #chat :Bye!`                   |
+	| **PRIVMSG**     | invia messaggio a un canale o utente               | `PRIVMSG #chat :hello world!`        |
+	| **NOTICE**      | messaggio non auto-rispondente (es. avvisi server) | `NOTICE #chat :Server restart soon!` | -> da vedere se aggiungere
+	| **PING / PONG** | keepalive tra client e server                      | `PING irc.local` / `PONG irc.local`  | -> da vedere se aggiungere
+	| **MODE**        | cambia impostazioni di canale o utente             | `MODE #chat +i`                      |
+	| **TOPIC**       | imposta o mostra il topic del canale               | `TOPIC #chat :Benvenuti!`            |
+	| **KICK**        | rimuove un utente dal canale                       | `KICK #chat bob :Rule violation`     |
+	| **INVITE**      | invita un utente a un canale                       | `INVITE bob #chat`                   |
+	| **QUIT**        | disconnette l’utente                               | `QUIT :Client exiting`               |
+
+ */ 
+// #define USER "USER"
+// #define USER "USER"
 
 class Server
 {

@@ -34,6 +34,7 @@ std::string Server::sendReceive(int clientSocket, std::string message)
 		return empty;
 	}
 	std::stringstream oss(received);
+	std::cout << received << std::endl;
 	std::string word;
 	oss >> word;
 	if (word == PASS)
@@ -75,6 +76,13 @@ std::string Server::sendReceive(int clientSocket, std::string message)
 		}
 		return received;
 	}
+	else
+	{
+		msg = "Command required " + message + "!\n";
+		send(clientSocket, msg.c_str(), msg.size(), 0);
+	}
+	std::string empty;
+	return empty;
 }
 
 User Server::userCreation(int clientSocket)
@@ -96,7 +104,7 @@ User Server::userCreation(int clientSocket)
 		user = sendReceive(clientSocket, USER);
 		if (user.empty())
 			continue;
-		std::cout << password << ' ' << nick << ' ' << user << std::endl;
+		std::cout << pass << ' ' << nick << ' ' << user << std::endl;
 		flag = true;
 	}
 	return User(user, nick, clientSocket);
@@ -190,6 +198,7 @@ void Server::accept_connections()
 						i--;
 						continue;
 					}
+					// TODO : command + effect
 					std::cout << "Message from client " << clientSocket << ' ' << this->findNickName(clientSocket)
 							  << ": " << buffer << std::endl;
 	
