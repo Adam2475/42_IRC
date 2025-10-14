@@ -28,9 +28,15 @@ class Server
 		~Server() {
 			// close fds here
 		};
-		int server_start();
+
+		///////////////////////////
+		// Public methods
+		int 	server_start();
 		User	userCreation(int clientSocket);
-		void accept_connections();
+		void 	accept_connections();
+
+		///////////////////////////
+		// Getters & Setters
 		std::vector<User> getUserVector() const;
 		std::string findNickName(int clientFd) const;
 		std::string sendReceive(int clientSocket, std::string message);

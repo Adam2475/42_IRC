@@ -21,14 +21,17 @@ class User
 		bool operator==(const User& other);
 		bool operator!=(const User& other);
 		~User();
-		std::string	getUserName() const;
-		void		setUserName(char *name);
-		std::string	getNickName() const;
-		void	setNickName(char *name);
-		struct	pollfd getPollFd() const;
-		void	setPollFd(int clientSocket);
-		int		getFd() const;
-		void	setFd(int clientSocket);
+
+		/////////////////////////////
+		// Getters & Setters
+		std::string		getUserName() const;
+		void			setUserName(char *name);
+		std::string		getNickName() const;
+		void			setNickName(char *name);
+		struct	pollfd 	getPollFd() const;
+		void			setPollFd(int clientSocket);
+		int				getFd() const;
+		void			setFd(int clientSocket);
 };
 
 #endif
