@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 
 ./ircserv <port> <password>
 
@@ -10,3 +11,33 @@
 - [ ] Add the server commands (PING, OPER, KILL...) 
 
 - [ ] Add the channel operations commands (JOIN, PART, INVITE, KICK, PRIVMSG, NOTICE...)
+=======
+- [ ] start server e registrazione dei client
+- [ ] scrittura primi User su page principale
+- [ ] aggiungere accept_connection in server.hpp
+- [ ] creare una funzione di scrittura messaggi del server e altri
+
+- [ ] IL LIMITE DEI MESSAGGI PER RFC È 512 SENNÒ È ERRORE
+
+
+- [ ] creazione channel
+- [ ] creazione specifiche channel: topic, invite only, operators ecc..
+
+Then, you have to implement the commands that are specific to channel
+operators:
+    ∗ KICK - Eject a client from the channel
+    ∗ INVITE - Invite a client to a channel
+    ∗ TOPIC - Change or view the channel topic
+    ∗ MODE - Change the channel’s mode:
+        · i: Set/remove Invite-only channel
+        · t: Set/remove the restrictions of the TOPIC command to channel operators
+        · k: Set/remove the channel key (password)
+
+Ogni messaggio IRC (comando, PRIVMSG, ecc.) non può superare 512 byte.
+
+Questo include:
+    - il prefisso ':' (se c’è)
+    - il comando
+    - i parametri
+    - il \r\n finale.
+>>>>>>> Stashed changes

@@ -1,11 +1,10 @@
 NAME = ircserv
-
 CC = c++
 
-CFLAGS = -Wall -Wextra -Werror -std=c++98
+# -Wall -Wextra -Werror
+CFLAGS = -std=c++98
 
-SRCS = $(wildcard src/*.cpp)
-
+SRCS = ./main.cpp ./Server.cpp ./User.cpp ./Channel.cpp ./header.cpp
 OBJS = $(SRCS:.cpp=.o)
 
 all: $(NAME)
