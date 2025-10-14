@@ -25,7 +25,9 @@
 #include "Channel.hpp"
 
 // int server_start(int port, std::string password, char **envp);
-int strlen(const char *str);
+int     strlen(const char *str);
 bool	isStrNotAlphaNum(const char *str);
+bool	isStrNotPrintable(const char *str);
+int     clearStrCRFL(std::string& received);
 
 #endif
