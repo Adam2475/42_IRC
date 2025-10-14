@@ -21,7 +21,7 @@ class Server
 		char        **envp;
 		// std::vector<Channel>	_channels;
 		std::vector<User>    	_users;
-		int	checkPassword(int clientSocket);
+		// int	checkPassword(int clientSocket);
 	public:
 		Server();
 		Server(short int port, std::string password, char **envp);

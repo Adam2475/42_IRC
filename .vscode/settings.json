@@ -1,8 +1,8 @@
 {
     "files.associations": {
         "*.embeddedhtml": "html",
-        "type_traits": "cpp",
         "vector": "cpp",
+        "optional": "cpp",
         "cctype": "cpp",
         "clocale": "cpp",
         "cmath": "cpp",
@@ -29,14 +29,13 @@
         "memory": "cpp",
         "memory_resource": "cpp",
         "numeric": "cpp",
-        "optional": "cpp",
         "random": "cpp",
         "string": "cpp",
         "string_view": "cpp",
         "system_error": "cpp",
         "tuple": "cpp",
+        "type_traits": "cpp",
         "utility": "cpp",
-        "fstream": "cpp",
         "initializer_list": "cpp",
         "iosfwd": "cpp",
         "iostream": "cpp",
@@ -47,10 +46,10 @@
         "ostream": "cpp",
         "ranges": "cpp",
         "span": "cpp",
-        "sstream": "cpp",
         "stdexcept": "cpp",
         "streambuf": "cpp",
         "cinttypes": "cpp",
-        "typeinfo": "cpp"
+        "typeinfo": "cpp",
+        "sstream": "cpp"
     }
 }
