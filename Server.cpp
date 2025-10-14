@@ -12,84 +12,6 @@ Server::Server(short int port, std::string password, char **envp) : port(port), 
 	serv_fd = -1;
 }
 
-// int Server::checkPassword(int clientSocket)
-// {
-// 	char buffer[512];
-// 	ssize_t n;
-// 	// send(clientSocket, "Set password: \n", 16, 0);
-// 	bzero(buffer, sizeof(buffer));
-// 	n = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
-// 	std::string received;
-
-// 	// TODO : forse metterre un limite di caratteri da aggiungere a 1024
-// 	if (n <= 0 || n > 512)
-// 		return (1);
-// 	buffer[n] = '\0';
-// 	// Trim trailing CR/LF that clients (nc) send on Enter
-// 	while (n > 0 && (buffer[n - 1] == '\n' || buffer[n - 1] == '\r'))
-// 	{
-// 		buffer[n - 1] = '\0';
-// 		n--;
-// 	}
-// 	received = buffer;
-// 	if (received.compare("PASS") != 0)
-// 		return send(clientSocket, "Wrong command!\n", 16, 0), 1;
-// 	if (received != password)
-// 	{
-// 		std::cout << received << " wrong password inputted, closing... " << password << " no password"<< std::endl;
-// 		send(clientSocket, "Wrong password!", 16, 0);
-// 		return (1);
-// 	}
-// 	return (0);
-// }
-
-// std::string Server::sendReceive(int clientSocket, std::string& message)
-// {
-// 	std::string msg;
-// 	int n;
-// 	char buffer[512];
-	
-// 	// std::cout << "entro" << std::endl;
-// 	msg += "Set " + message + " :\n";
-// 	send(clientSocket, msg.c_str(), msg.size(), 0);
-// 	bzero(buffer, sizeof(buffer));
-// 	n = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
-// 	// TODO: aggiungere un keep_reading per n maggiori di 1024
-// 	if (n <= 0 || n > 512)
-// 	{
-// 		static std::string empty;
-// 		msg = "Wrong " + message + "!";
-// 		send(clientSocket, msg.c_str(), msg.size(), 0);
-// 		return empty;
-// 	}
-// 	if (buffer[0] == '\r' && buffer[1] == '\n' && n > 1)
-// 	{
-// 		bzero(buffer, 2);
-// 		n = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
-// 		// TODO: aggiungere un keep_reading per n maggiori di 1024
-// 		if (n <= 0)
-// 		{
-// 			static std::string empty;
-// 			msg = "Wrong " + message + "!";
-// 			send(clientSocket, msg.c_str(), msg.size(), 0);
-// 			return empty;
-// 		}
-// 	}
-// 	std::string try1;
-// 	int i = 0;
-// 	while (std::isprint(buffer[i]))
-// 	{
-// 		try1 += buffer[i];
-// 		i++;
-// 	}
-// 	// std::cout << try1 << std::endl;
-// 	if (try1.empty() || isStrNotAlphaNum(try1.c_str()))
-// 	{
-// 		return this->sendReceive(clientSocket, message);
-// 	}
-// 	return try1;
-// }
-
 std::string Server::sendReceive(int clientSocket, std::string message)
 {
 	std::string msg;
@@ -106,62 +28,53 @@ std::string Server::sendReceive(int clientSocket, std::string message)
 		n = recv(clientSocket, buffer, sizeof(buffer), 0);
 		received += buffer;
 	}
-	
 	if(clearStrCRFL(received))
 	{
 		static std::string empty;
 		return empty;
 	}
-	if (received.compare(message) != 0)
+	std::stringstream oss(received);
+	std::string word;
+	oss >> word;
+	if (word == PASS)
 	{
-		// std::cout << message << " != " << received << std::endl;
-		static std::string empty;
-		msg = "Wrong command! Required " + message + " command!\n";
-		send(clientSocket, msg.c_str(), msg.size(), 0);
-		return empty;
-	}	
-	bzero(buffer, sizeof(buffer));
-	n = recv(clientSocket, buffer, sizeof(buffer), 0);
-	buffer[n] = '\0';
-	if (n <= 0)
-	{
-		static std::string empty;
-		return empty;
-	}
-	received.erase(0, received.size());
-	received = buffer;
-	std::cout << "entro " << n << " " << received << std::endl;
-	if(clearStrCRFL(received))
-	{
-		static std::string empty;
-		return empty;
-	}
-	if (message.compare("PASS") == 0)
-	{
-		if (received.compare(password) != 0)
+		received.erase(0, received.size());
+		oss >> received;
+		if(clearStrCRFL(received))
 		{
-			std::cout << password << ' ' << received;
-			static std::string empty;
 			msg = "Wrong password!\n";
-			send(clientSocket, msg.c_str(), msg.size(), 0);
+			send(clientSocket, msg.c_str(), msg.size(), 0);		
+			static std::string empty;
 			return empty;
 		}
-		else if (received.compare(password) == 0)
+		if (received == password)
 			return received;
 		else
 		{
-			std::string empty;
+			msg = "Wrong password!\n";
+			send(clientSocket, msg.c_str(), msg.size(), 0);
+			static std::string empty;
 			return empty;
 		}
 	}
-	else if (isStrNotPrintable(received.c_str()))
+	else if (word == message)
 	{
-		static std::string empty;
-		msg = "Insert a valid " + message + "!";
-		send(clientSocket, msg.c_str(), msg.size(), 0);
-		return empty;
+		received.erase(0, received.size());
+		oss >> received;
+		if(clearStrCRFL(received))
+		{
+			static std::string empty;
+			return empty;
+		}
+		if (isStrNotPrintable(received.c_str()))
+		{
+			static std::string empty;
+			msg = "Insert a valid " + message + "!";
+			send(clientSocket, msg.c_str(), msg.size(), 0);
+			return empty;
+		}
+		return received;
 	}
-	return received;
 }
 
 User Server::userCreation(int clientSocket)
