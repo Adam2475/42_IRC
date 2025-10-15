@@ -1,5 +1,28 @@
 #include "header.hpp"
 
+void    setPollOut(std::vector<pollfd> &poll_fds, int targetFd)
+{
+ 	for (size_t i = 1; i < poll_fds.size(); i++) {
+		if (poll_fds[i].fd == targetFd)
+        {
+			poll_fds[i].events = poll_fds[i].events + POLLOUT;
+			break;
+		}
+	}   
+}
+
+// clear POLLOUT by explicitly restoring the events field (here we restore to POLLIN)
+void    setPollIn(std::vector<pollfd> &poll_fds, int targetFd)
+{
+	for (size_t i = 1; i < poll_fds.size(); i++) {
+		if (poll_fds[i].fd == targetFd)
+        {
+			poll_fds[i].events = POLLIN;
+			break;
+		}
+	}
+}
+
 int		cmdPrivateMsg(std::stringstream &oss, std::vector<User> users, std::vector<pollfd> &poll_fds, const std::string &senderNick)
 {
     std::cout << "PRIVMSG found" << std::endl;
@@ -43,7 +66,10 @@ int		cmdPrivateMsg(std::stringstream &oss, std::vector<User> users, std::vector<
 		// poll_fds[recipFd]
 		// build and send the PRIVMSG to the recipient
 		std::string out = ":" + senderNick + " PRIVMSG " + target + " :" + msgBody + "\r\n";
-		send(recipFd, out.c_str(), out.size(), 0);						
+
+        setPollOut(poll_fds, recipFd);
+		send(recipFd, out.c_str(), out.size(), 0);
+        setPollIn(poll_fds, recipFd);				
 	}
     return (0);
 }

@@ -32,5 +32,7 @@ int     clearStrCRFL(std::string& received);
 
 int		cmdPrivateMsg(std::stringstream &oss, std::vector<User> users, 
             std::vector<pollfd> &poll_fds, const std::string &senderNick);
+void    setPollOut(std::vector<pollfd> &poll_fds, int targetFd);
+void    setPollIn(std::vector<pollfd> &poll_fds, int targetFd);
 
 #endif
