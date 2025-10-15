@@ -59,15 +59,13 @@ class Server
 			// close fds here
 		};
 
-		//////////////////////////////////////
+		///////////////////////////
 		// Public methods
 		int 	server_start();
 		User	userCreation(int clientSocket);
 		void 	accept_connections();
 
-		// commands
-
-		//////////////////////////////////////
+		///////////////////////////
 		// Getters & Setters
 		std::vector<User> getUserVector() const;
 		std::string findNickName(int clientFd) const;
