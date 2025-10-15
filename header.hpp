@@ -30,4 +30,7 @@ bool	isStrNotAlphaNum(const char *str);
 bool	isStrNotPrintable(const char *str);
 int     clearStrCRFL(std::string& received);
 
+int		cmdPrivateMsg(std::stringstream &oss, std::vector<User> users, 
+            std::vector<pollfd> &poll_fds, const std::string &senderNick);
+
 #endif

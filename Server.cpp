@@ -34,25 +34,38 @@ std::string Server::sendReceive(int clientSocket, std::string message)
 		return empty;
 	}
 	std::stringstream oss(received);
-	std::cout << received << std::endl;
+	std::cout << "received: " << received << std::endl;
 	std::string word;
 	oss >> word;
-	if (word == PASS)
+	if (word == "PASS")
 	{
-		received.erase(0, received.size());
-		oss >> received;
-		if(clearStrCRFL(received))
+		word.append(" :");
+		if (word == PASS)
 		{
-			msg = "Wrong password!\n";
-			send(clientSocket, msg.c_str(), msg.size(), 0);		
-			static std::string empty;
-			return empty;
+			received.erase(0, received.size());
+			// :pass
+			oss >> received;
+			received.erase(0, 1);
+			if(clearStrCRFL(received))
+			{
+				msg = "Wrong password1!\n";
+				send(clientSocket, msg.c_str(), msg.size(), 0);		
+				static std::string empty;
+				return empty;
+			}
+			if (received == password)
+				return received;
+			else
+			{
+				msg = "Wrong password2!\n";
+				send(clientSocket, msg.c_str(), msg.size(), 0);
+				static std::string empty;
+				return empty;
+			}
 		}
-		if (received == password)
-			return received;
 		else
 		{
-			msg = "Wrong password!\n";
+			msg = "Wrong command!\n";
 			send(clientSocket, msg.c_str(), msg.size(), 0);
 			static std::string empty;
 			return empty;
@@ -119,7 +132,6 @@ void Server::statusPrint(int i, int clientSocket)
 	clients--;
 }
 
-
 void Server::accept_connections()
 {
 	// hold the fd of a connected client socket
@@ -156,8 +168,8 @@ void Server::accept_connections()
 
 		if (poll_fds[0].revents & POLLIN)
 		{
-			 std::cout << "New connection incoming..." << std::endl;
-			 clientSocket = accept(serv_fd, (struct sockaddr*)&client_addr, &client_addr_len);
+			std::cout << "New connection incoming..." << std::endl;
+			clientSocket = accept(serv_fd, (struct sockaddr*)&client_addr, &client_addr_len);
 	
 			// if there is a new connection accept it
 			if (clientSocket > 0)
@@ -165,7 +177,7 @@ void Server::accept_connections()
 				std::cout << "new connection accepted" << std::endl;   
 				User new_user = this->userCreation(clientSocket);
 				_users.push_back(new_user);
-				std::cout << buffer << "user created successfully";
+				// std::cout << buffer << "user created successfully";
 				// add new client to poll_fds
 				poll_fds.push_back(new_user.getPollFd());
 				// increment total clients
@@ -198,12 +210,35 @@ void Server::accept_connections()
 						i--;
 						continue;
 					}
-					// TODO : command + effect
+					//////////////////////////////////////////////////////////
+
+					std::string received;
+					received += buffer;
+					
+					while (received.find_first_of("\r\n") == std::string::npos)
+					{
+						bzero(buffer, sizeof(buffer));
+						status = recv(clientSocket, buffer, sizeof(buffer), 0);
+						received += buffer;
+					}
+					if(clearStrCRFL(received))
+					{
+						continue ;
+					}
+					std::stringstream oss(received);
+					std::cout << "received: " << received << std::endl;
+					std::string word;
+					oss >> word;
+					if (word == PRIVMSG)
+					{
+						if (cmdPrivateMsg(oss, _users, poll_fds, findNickName(clientSocket)))
+							continue ;
+					}
+					///////////////////////////////////////////////////////////
+
 					std::cout << "Message from client " << clientSocket << ' ' << this->findNickName(clientSocket)
 							  << ": " << buffer << std::endl;
 	
-					// i--;
-					// continue;
 				}
 				else if (status == 0)  // ADD: Handle client disconnection
 				{
