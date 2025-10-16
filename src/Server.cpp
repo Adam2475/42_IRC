@@ -1,6 +1,6 @@
-#include "header.hpp"
- #include <netdb.h>
-#include "Server.hpp"
+#include "../inc/header.hpp"
+#include <netdb.h>
+#include "../inc/Server.hpp"
 
 Server::Server() {}
 

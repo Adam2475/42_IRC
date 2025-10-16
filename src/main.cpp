@@ -1,5 +1,5 @@
-#include "header.hpp"
-#include "Server.hpp"
+#include "../inc/header.hpp"
+#include "../inc/Server.hpp"
 #include <limits.h>
 #include <cstdlib> 
 

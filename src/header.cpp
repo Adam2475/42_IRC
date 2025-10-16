@@ -1,4 +1,4 @@
-#include "header.hpp"
+#include "../inc/header.hpp"
 
 int strlen(const char *str)
 {
