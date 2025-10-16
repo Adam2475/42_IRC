@@ -1,4 +1,5 @@
 #include "../inc/header.hpp"
+#include "../inc/Channel.hpp"
 
 void    setPollOut(std::vector<pollfd> &poll_fds, int targetFd)
 {
@@ -72,4 +73,31 @@ int		cmdPrivateMsg(std::stringstream &oss, std::vector<User> users, std::vector<
         setPollIn(poll_fds, recipFd);				
 	}
     return (0);
+}
+
+int		cmdJoin(std::vector<Channel>& _channels, std::stringstream &oss, std::vector<pollfd> &poll_fds)
+{
+	std::cout << "detected command JOIN" << std::endl;
+	std::string token;
+
+	if (!(oss >> token || token.empty()))
+	{
+		// send "461 JOIN :Not enough parameters\r\n";
+		std::cout << "not enough params" << std::endl;
+		return (1);
+	}
+
+	if (token[0] != '#')
+	{
+		// "403 "
+		std::cout << "no such channel" << std::endl;
+		return (1);
+	}
+
+	// add parsing and channel creation
+
+	std::cout << token << std::endl;
+
+	//std::cout << oss << std::endl;
+	return (0);
 }

@@ -40,17 +40,17 @@
 class Server
 {
 	private:
-		short int   port;
-		int			clients;
-		int			pClients;
-		int			status;
-		std::string password;
-		int 		serv_fd;
-		struct pollfd data;
-		std::vector<pollfd> poll_fds;
-		char        **envp;
-		// std::vector<Channel>	_channels;
-		std::vector<User>    	_users;
+		short int   			port;
+		int						clients;
+		int						pClients;
+		int						status;
+		std::string 			password;
+		int 					serv_fd;
+		struct pollfd 			data;
+		std::vector<pollfd> 	poll_fds;
+		char        			**envp;
+		std::vector<User>		_users;
+		std::vector<Channel>	_channels;
 		// int	checkPassword(int clientSocket);
 	public:
 		Server();

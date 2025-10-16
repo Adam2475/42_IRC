@@ -211,7 +211,7 @@ void Server::accept_connections()
 						continue;
 					}
 					//////////////////////////////////////////////////////////
-
+					// Command Parsing
 					std::string received;
 					received += buffer;
 					
@@ -232,6 +232,11 @@ void Server::accept_connections()
 					if (word == PRIVMSG)
 					{
 						if (cmdPrivateMsg(oss, _users, poll_fds, findNickName(clientSocket)))
+							continue ;
+					}
+					else if (word == JOIN)
+					{
+						if (cmdJoin(_channels, oss, poll_fds))
 							continue ;
 					}
 					///////////////////////////////////////////////////////////
