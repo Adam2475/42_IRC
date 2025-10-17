@@ -75,10 +75,11 @@ int		cmdPrivateMsg(std::stringstream &oss, std::vector<User> users, std::vector<
     return (0);
 }
 
-int		cmdJoin(std::vector<Channel>& _channels, std::stringstream &oss, std::vector<pollfd> &poll_fds)
+int		cmdJoin(std::vector<Channel>& _channels, std::stringstream &oss, std::vector<pollfd> &poll_fds, User user)
 {
 	std::cout << "detected command JOIN" << std::endl;
 	std::string token;
+	bool		channel_found = false;
 
 	if (!(oss >> token || token.empty()))
 	{
@@ -95,6 +96,35 @@ int		cmdJoin(std::vector<Channel>& _channels, std::stringstream &oss, std::vecto
 	}
 
 	// add parsing and channel creation
+
+	std::vector<Channel>::iterator channelIterator = _channels.begin();
+
+	while (channelIterator != _channels.end())
+	{
+		std::cout << "searching trough channels" << std::endl;
+		if (token == channelIterator->getName())
+		{
+			std::cout << "channel found" << std::endl;
+			channel_found = true;
+			break ;
+		}
+		*channelIterator++;
+	}
+	std::string topic = "default";
+	std::string pass = "default";
+	if (!channel_found)
+	{
+		// name, pass, creator, topic, max users, invite_only, topic restriction
+		Channel(token, pass, user, topic, 100, 0, 0);
+
+		std::cout << "channel not found, creating..." << std::endl;
+
+		// add channel creation
+	}
+	else
+	{
+		std::cout << "channel already exists send join request" << std::endl;
+	}
 
 	std::cout << token << std::endl;
 

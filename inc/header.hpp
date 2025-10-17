@@ -34,7 +34,8 @@ int     clearStrCRFL(std::string& received);
 // Commands
 int		cmdPrivateMsg(std::stringstream &oss, std::vector<User> users, 
             std::vector<pollfd> &poll_fds, const std::string &senderNick);
-int		cmdJoin(std::vector<Channel>& _channels, std::stringstream &oss, std::vector<pollfd> &poll_fds);
+int		cmdJoin(std::vector<Channel>& _channels, std::stringstream &oss, 
+            std::vector<pollfd> &poll_fds, User user);
 
 /////////////////
 // Utils

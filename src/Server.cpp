@@ -236,7 +236,16 @@ void Server::accept_connections()
 					}
 					else if (word == JOIN)
 					{
-						if (cmdJoin(_channels, oss, poll_fds))
+						// find creator User in users vector (prefer by fd, fallback by nick)
+						User joiningUser;
+						for (size_t ui = 0; ui < _users.size(); ++ui)
+                        {
+                            if (_users[ui].getFd() == clientSocket)
+                            {
+                                joiningUser = _users[ui]; // copy
+                            }
+                        }
+						if (cmdJoin(_channels, oss, poll_fds, joiningUser))
 							continue ;
 					}
 					///////////////////////////////////////////////////////////
@@ -287,7 +296,8 @@ static std::string get_ip_addr(char **env)
 	char *IP;
 	struct hostent *host_entry;
 	host_entry = gethostbyname(envStr.c_str());
-	if (host_entry == NULL){
+	if (host_entry == NULL)
+	{
 		perror("host entry not found");
 		exit(1);
 	}
