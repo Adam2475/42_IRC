@@ -1,10 +1,6 @@
 #ifndef CHANNEL_HPP
 # define CHANNEL_HPP
-
-# include "User.hpp"
-# include <vector>
-# include <string>
-# include <unistd.h>
+# include "header.hpp"
 
 class Channel
 {
@@ -31,7 +27,8 @@ class Channel
 
 		std::vector<User> getUserVector() const;
 		std::string getName() const;
-		void	addUserToVector(User& user, User& user_operator);
+		void	addUserToChannel(User& user, std::string& passwd);
+		void	inviteUser(User& user, User&user_operator);
 		void	addUserToOperatorsVector(User& user, User& user_operator);
 		void	setMaxUsers(unsigned int max_users, User& user_operator);
 		void	setName(std::string& name, User& user_operator);

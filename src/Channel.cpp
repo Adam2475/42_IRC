@@ -41,6 +41,7 @@ Channel::Channel(std::string& name, std::string& passwd, User& creator, std::str
 {
 	_user_vector.push_back(creator);
 	_operators_vector.push_back(creator);
+	std::cout << "Channel " << name << " created successfully!" << std::endl;
 }
 
 bool	isInVector(User& user, std::vector<User>& vector)
@@ -54,7 +55,23 @@ bool	isInVector(User& user, std::vector<User>& vector)
 	return 0;	
 }
 
-void	Channel::addUserToVector(User& user, User&user_operator)
+void	Channel::addUserToChannel(User& user, std::string& passwd)
+{
+	if (!_passwd.empty() && _passwd.compare(passwd) != 0)
+	{
+		send(user.getFd(), "Wrong password! Access to channel denied!\n", 43, 0);
+		return ;
+	}
+	if (isInVector(user, _user_vector))
+	{
+		send(user.getFd(), "You're already part of this channel\n", 37, 0);
+		return ;
+	}
+	else
+		_user_vector.push_back(user);
+}
+
+void	Channel::inviteUser(User& user, User&user_operator)
 {
 	if (!isInVector(user_operator, _operators_vector))
 	{

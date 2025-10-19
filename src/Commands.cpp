@@ -79,7 +79,6 @@ int		cmdJoin(std::vector<Channel>& _channels, std::stringstream &oss, std::vecto
 {
 	std::cout << "detected command JOIN" << std::endl;
 	std::string token;
-	bool		channel_found = false;
 
 	if (!(oss >> token || token.empty()))
 	{
@@ -94,38 +93,30 @@ int		cmdJoin(std::vector<Channel>& _channels, std::stringstream &oss, std::vecto
 		std::cout << "no such channel" << std::endl;
 		return (1);
 	}
+	std::string channelName = token.substr(1, token.size() - 1);
 
 	// add parsing and channel creation
-
+	std::string pass;
+	oss >> pass;
 	std::vector<Channel>::iterator channelIterator = _channels.begin();
-
 	while (channelIterator != _channels.end())
 	{
 		std::cout << "searching trough channels" << std::endl;
-		if (token == channelIterator->getName())
+		if (channelName == channelIterator->getName())
 		{
 			std::cout << "channel found" << std::endl;
-			channel_found = true;
-			break ;
+			channelIterator->addUserToChannel(user, pass);
 		}
-		*channelIterator++;
+		++channelIterator;
 	}
-	std::string topic = "default";
-	std::string pass = "default";
-	if (!channel_found)
+	std::string topic;
+	oss >> topic;
+	if (channelIterator == _channels.cend())
 	{
+		std::cout << channelName << "channel not found, creating..." << std::endl;
 		// name, pass, creator, topic, max users, invite_only, topic restriction
-		Channel(token, pass, user, topic, 100, 0, 0);
-
-		std::cout << "channel not found, creating..." << std::endl;
-
-		// add channel creation
+		_channels.push_back(Channel(channelName, pass, user, topic, 100, 0, 0));
 	}
-	else
-	{
-		std::cout << "channel already exists send join request" << std::endl;
-	}
-
 	std::cout << token << std::endl;
 
 	//std::cout << oss << std::endl;
