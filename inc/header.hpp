@@ -22,24 +22,15 @@
 
 #include <poll.h>
 #include "User.hpp"
-#include "Channel.hpp"
+class Channel;
 
 // int server_start(int port, std::string password, char **envp);
 int     strlen(const char *str);
 bool	isStrNotAlphaNum(const char *str);
 bool	isStrNotPrintable(const char *str);
 int     clearStrCRFL(std::string& received);
-
-//////////////////
-// Commands
-int		cmdPrivateMsg(std::stringstream &oss, std::vector<User> users, 
-            std::vector<pollfd> &poll_fds, const std::string &senderNick);
-int		cmdJoin(std::vector<Channel>& _channels, std::stringstream &oss, 
-            std::vector<pollfd> &poll_fds, User user);
-
-/////////////////
-// Utils
-void    setPollOut(std::vector<pollfd> &poll_fds, int targetFd);
-void    setPollIn(std::vector<pollfd> &poll_fds, int targetFd);
+void    pollIn(User& user);
+void    pollOut(User& user);
+bool	isInVector(User& user, std::vector<User>& vector);
 
 #endif

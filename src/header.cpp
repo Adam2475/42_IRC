@@ -1,4 +1,5 @@
 #include "../inc/header.hpp"
+#include "../inc/Channel.hpp"
 
 int strlen(const char *str)
 {
@@ -50,4 +51,26 @@ int	clearStrCRFL(std::string& received)
 	if (received.empty())
 		return 1;
 	return 0;
+}
+
+void pollIn(User& user)
+{
+	struct pollfd poll = user.getPollFd();
+	poll.events = POLLIN;
+}
+
+void pollOut(User& user)
+{
+	struct pollfd poll = user.getPollFd();
+	poll.events = POLLOUT;
+}
+
+bool	isInVector(User& user, std::vector<User>& vector)
+{
+	for (size_t i = 0; i < vector.size(); i++)
+	{
+		if (vector[i] == user)
+			return 1;
+	}
+	return 0;	
 }

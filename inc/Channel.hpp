@@ -16,11 +16,11 @@ class Channel
 		// TODO: da settare a false al costruttore
 		bool		_invite_only;
 		bool		_topic_restriction;
+		
+		public:
 		Channel();
 		Channel(const Channel& other);
 		Channel& operator=(const Channel& other);
-
-	public:
 		Channel(std::string& name, std::string& passwd, User& creator, std::string& topic
 			, unsigned int max_users, bool invite_only, bool topic_restriction);
 		~Channel();
@@ -33,6 +33,8 @@ class Channel
 		void	setMaxUsers(unsigned int max_users, User& user_operator);
 		void	setName(std::string& name, User& user_operator);
 		void	kickUser(User& user, User& user_operator);
+		void	partUser(User& user);
+		void	writeToChannel(User& user, std::string& buffer);
 		// void	inviteUser(User& user, User& user_operator);
 		// void	setTopic(std::string& passwd, User& user_operator);
 		// void	setTopic(std::string& passwd, User& user_operator);
@@ -42,9 +44,6 @@ class Channel
 		// void	removePasswd(std::string& passwd, User& user_operator);
 		// void	givePrivilageOpt(std::string& userName, User& user_operator);
 		// void	removePrivilageOpt(std::string& userName, User& user_operator);
-		// void	writeToChannel(User& user, std::string& buffer);
 };
-
-
 
 #endif

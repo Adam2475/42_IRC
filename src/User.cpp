@@ -83,14 +83,14 @@ void User::setFd(int clientSocket)
 
 bool User::operator==(const User& other)
 {
-	if (_nickName == other.getNickName())
+	if (_clientSocket == other.getFd())
 		return 1;
 	return 0;
 }
 
 bool User::operator!=(const User& other)
 {
-	if (_nickName != other.getNickName())
+	if (_clientSocket != other.getFd())
 		return 1;
 	return 0;
 }

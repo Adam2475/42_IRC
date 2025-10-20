@@ -5,7 +5,8 @@ Channel::Channel()
 }
 
 //TODO: aggiungere nuovi membri privati nel copy e assignment operator
-Channel::Channel(const Channel& other) : _name(other._name), _user_vector(other._user_vector)
+Channel::Channel(const Channel& other) : _name(other._name), _user_vector(other._user_vector), 
+_operators_vector(other._operators_vector), _passwd(other._passwd), _topic(other._topic), _max_users(other._max_users)
 {
 }
 
@@ -15,6 +16,10 @@ Channel& Channel::operator=(const Channel& other)
 	{
 		_name = other._name;
 		_user_vector = other._user_vector;
+		_operators_vector = other._operators_vector;
+		_passwd = other._passwd;
+		_topic = other._topic;
+		_max_users = other._max_users;
 	}
 	return *this;
 }
@@ -25,8 +30,8 @@ Channel::~Channel()
 
 std::vector<User> Channel::getUserVector() const
 {
-	std::vector<User> new_map(_user_vector);
-	return new_map;
+	std::vector<User> new_vect(_user_vector);
+	return new_vect;
 }
 
 std::string Channel::getName() const
@@ -42,29 +47,27 @@ Channel::Channel(std::string& name, std::string& passwd, User& creator, std::str
 	_user_vector.push_back(creator);
 	_operators_vector.push_back(creator);
 	std::cout << "Channel " << name << " created successfully!" << std::endl;
-}
 
-bool	isInVector(User& user, std::vector<User>& vector)
-{
-	for (size_t i = 0; i < vector.size(); i++)
-	{
-		if (vector[i] == user)
-			return 1;
-		i++;
-	}
-	return 0;	
+	pollOut(creator);
+	std::string msg = "Hai creato il canale: " + name + "!\n";
+	send(creator.getFd(), msg.c_str(), msg.size(), 0);
+	pollIn(creator);
 }
 
 void	Channel::addUserToChannel(User& user, std::string& passwd)
 {
 	if (!_passwd.empty() && _passwd.compare(passwd) != 0)
 	{
+		pollOut(user);
 		send(user.getFd(), "Wrong password! Access to channel denied!\n", 43, 0);
+		pollIn(user);
 		return ;
 	}
 	if (isInVector(user, _user_vector))
 	{
+		pollOut(user);
 		send(user.getFd(), "You're already part of this channel\n", 37, 0);
+		pollIn(user);
 		return ;
 	}
 	else
@@ -85,6 +88,20 @@ void	Channel::inviteUser(User& user, User&user_operator)
 	}
 	else
 		_user_vector.push_back(user);
+	/**
+	 * 
+	 *  TODO:
+	 * Il server invia al client una serie di messaggi di conferma:
+
+			JOIN (per dire che sei entrato),
+
+			eventuale RPL_TOPIC (il topic del canale),
+
+			RPL_NAMREPLY (lista utenti nel canale),
+
+			RPL_ENDOFNAMES.
+	 */
+	
 }
 
 void	Channel::addUserToOperatorsVector(User& user, User& user_operator)
@@ -141,13 +158,41 @@ void	Channel::kickUser(User &user, User &user_operator)
 	{
 		std::vector<User>::iterator it;
 		int i = 0;
-		for (it = _user_vector.begin(); *it != user; ++it)
-			_user_vector.erase(it);
+		for (it = _user_vector.begin(); it != _user_vector.end(); ++it)
+		{
+			if (*it == user)
+			{
+				_user_vector.erase(it);
+				break;
+			}
+		}
 		if (isInVector(user, _operators_vector))
 		{
 			for(it = _operators_vector.begin(); *it != user; ++it)
 				_operators_vector.erase(it);
 		}
 		// TODO: aggiungere messaggio
+	}
+}
+
+void	Channel::partUser(User& user)
+{
+	for (std::vector<User>::iterator it = _user_vector.begin(); it != _user_vector.end(); ++it)
+	{
+		if (user == *it)
+		{
+			_user_vector.erase(it);
+			break;
+		}
+	}
+}
+
+void Channel::writeToChannel(User& user, std::string& buffer)
+{
+	for (std::vector<User>::iterator it = _user_vector.begin(); it != _user_vector.end(); ++it)
+	{
+		pollOut(*it);
+		send(it->getFd(), buffer.c_str(), buffer.size(), 0);
+		pollIn(*it);
 	}
 }

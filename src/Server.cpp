@@ -193,7 +193,7 @@ void Server::accept_connections()
 				clientSocket = poll_fds[i].fd;
 				bzero(buffer, 1024);
 				status = recv(poll_fds[i].fd, buffer, sizeof(buffer) - 1, 0);
-				// TODO : se il messaggio supera i 1024 char te lo tronca in più messaggi
+				// TODO : se il messaggio supera i 512 char te lo tronca in più messaggi
 				if (status > 0)
 				{
 					buffer[status] = '\0'; // Null terminate the string
@@ -231,7 +231,7 @@ void Server::accept_connections()
 					oss >> word;
 					if (word == PRIVMSG)
 					{
-						if (cmdPrivateMsg(oss, _users, poll_fds, findNickName(clientSocket)))
+						if (cmdPrivateMsg(oss, findNickName(clientSocket)))
 							continue ;
 					}
 					else if (word == JOIN)
@@ -245,9 +245,17 @@ void Server::accept_connections()
                                 joiningUser = _users[ui]; // copy
                             }
                         }
-						if (cmdJoin(_channels, oss, poll_fds, joiningUser))
+						if (cmdJoin(oss, joiningUser))
 							continue ;
 					}
+					else if (word == PART)
+					{
+						cmdPart(oss, clientSocket);
+						continue;
+					}
+
+					// TODO: se non ci sono comandi prima di un mess bisogna dare 421 ERR_UNKNOWNCOMMAND
+
 					///////////////////////////////////////////////////////////
 
 					std::cout << "Message from client " << clientSocket << ' ' << this->findNickName(clientSocket)

@@ -1,7 +1,8 @@
 #include "../inc/header.hpp"
 #include "../inc/Channel.hpp"
+#include "../inc/Server.hpp"
 
-void    setPollOut(std::vector<pollfd> &poll_fds, int targetFd)
+void    Server::setPollOut(int targetFd)
 {
  	for (size_t i = 1; i < poll_fds.size(); i++) {
 		if (poll_fds[i].fd == targetFd)
@@ -13,7 +14,7 @@ void    setPollOut(std::vector<pollfd> &poll_fds, int targetFd)
 }
 
 // clear POLLOUT by explicitly restoring the events field (here we restore to POLLIN)
-void    setPollIn(std::vector<pollfd> &poll_fds, int targetFd)
+void    Server::setPollIn(int targetFd)
 {
 	for (size_t i = 1; i < poll_fds.size(); i++) {
 		if (poll_fds[i].fd == targetFd)
@@ -24,7 +25,7 @@ void    setPollIn(std::vector<pollfd> &poll_fds, int targetFd)
 	}
 }
 
-int		cmdPrivateMsg(std::stringstream &oss, std::vector<User> users, std::vector<pollfd> &poll_fds, const std::string &senderNick)
+int		Server::cmdPrivateMsg(std::stringstream &oss, const std::string &senderNick)
 {
     std::cout << "PRIVMSG found" << std::endl;
 	std::string targetsToken;
@@ -48,16 +49,18 @@ int		cmdPrivateMsg(std::stringstream &oss, std::vector<User> users, std::vector<
 		if (target.empty())
 			return (1);
 		// find recipient fd by nickname
-		int recipFd = -1;
-		for (size_t ui = 0; ui < users.size(); ++ui)
+		// int recipFd = -1;
+		size_t ui = 0;
+		while (ui < _users.size())
 		{
-			if (users[ui].getNickName() == target)
+			if (_users[ui].getNickName() == target)
 			{
-				recipFd = users[ui].getFd();
+				// recipFd = _users[ui].getFd();
 				break;
 			}
+			ui++;
 		}
-		if (recipFd == -1)
+		if (ui == _users.size())
 		{
 			//std::string err = "401 " + findNickName(clientSocket) + " " + singleTarget + " :No such nick/channel\r\n";
 			//send(clientSocket, err.c_str(), err.size(), 0);
@@ -68,14 +71,14 @@ int		cmdPrivateMsg(std::stringstream &oss, std::vector<User> users, std::vector<
 		// build and send the PRIVMSG to the recipient
 		std::string out = ":" + senderNick + " PRIVMSG " + target + " :" + msgBody + "\r\n";
 
-        setPollOut(poll_fds, recipFd);
-		send(recipFd, out.c_str(), out.size(), 0);
-        setPollIn(poll_fds, recipFd);				
+        pollOut(_users[ui]);
+		send(_users[ui].getFd(), out.c_str(), out.size(), 0);
+        pollIn(_users[ui]);
 	}
     return (0);
 }
 
-int		cmdJoin(std::vector<Channel>& _channels, std::stringstream &oss, std::vector<pollfd> &poll_fds, User user)
+int		Server::cmdJoin(std::stringstream &oss, User user)
 {
 	std::cout << "detected command JOIN" << std::endl;
 	std::string token;
@@ -106,12 +109,17 @@ int		cmdJoin(std::vector<Channel>& _channels, std::stringstream &oss, std::vecto
 		{
 			std::cout << "channel found" << std::endl;
 			channelIterator->addUserToChannel(user, pass);
+			pollOut(user);
+			std::string msg = "Welcome to #" + channelIterator->getName() + "!\n";
+			send(user.getFd(), msg.c_str(), msg.size(), 0);
+			pollIn(user);
+			return 0;
 		}
 		++channelIterator;
 	}
 	std::string topic;
 	oss >> topic;
-	if (channelIterator == _channels.cend())
+	if (channelIterator == _channels.end())
 	{
 		std::cout << channelName << "channel not found, creating..." << std::endl;
 		// name, pass, creator, topic, max users, invite_only, topic restriction
@@ -121,4 +129,73 @@ int		cmdJoin(std::vector<Channel>& _channels, std::stringstream &oss, std::vecto
 
 	//std::cout << oss << std::endl;
 	return (0);
+}
+
+int Server::cmdPart(std::stringstream &oss, int clientSocket)
+{
+	User user;
+	for (size_t i = 0; i < _users.size(); i++)
+	{
+		if (_users[i].getFd() == clientSocket)
+		{
+			user = _users[i];
+			break;
+		}
+	}
+	std::string token;
+	oss >> token;
+	if (token.empty())
+	{
+		pollOut(user);
+		std::string msg = "Command usage: PART <channel name> :<bye message>\n";
+		send(user.getFd(), msg.c_str(), msg.size(), 0);
+		pollIn(user);
+		return 1;
+	}
+	std::string channelName = token.substr(1, token.size() - 1);
+	std::vector<Channel>::iterator channelIterator = _channels.begin();
+	while (channelIterator != _channels.end())
+	{
+		// std::cout << "searching trough channels PART COMMAND" << std::endl;
+		if (channelName == channelIterator->getName())
+		{
+			// std::cout << token << " sono qui 1" << std::endl;
+			std::vector<User> user_vect = channelIterator->getUserVector();
+			if (isInVector(user, user_vect))
+			{
+				std::string bye_msg;
+				oss >> bye_msg;
+				// std::cout << bye_msg << " -> bye_msg sono qui 2" << std::endl;
+				if (bye_msg[0] != ':')
+				{
+					pollOut(user);
+					std::string msg = "Command usage: PART <channel name> :<bye message>\n";
+					send(user.getFd(), msg.c_str(), msg.size(), 0);
+					pollIn(user);
+					return 1;
+				}
+				bye_msg += "\r\n";
+				channelIterator->writeToChannel(user, bye_msg);
+				channelIterator->partUser(user);
+			}
+			else
+			{
+
+				std::cout << "sono qui 3 vect size = " << channelIterator->getUserVector().size() << std::endl;
+				pollOut(user);
+				std::string msg = "Didn't work!\n";
+				send(user.getFd(), msg.c_str(), msg.size(), 0);
+				pollIn(user);
+				return 1;
+			}
+			pollOut(user);
+			std::string msg = "You aren't part of " + channelIterator->getName() + " anymore. Goodbye!\n";
+			send(user.getFd(), msg.c_str(), msg.size(), 0);
+			pollIn(user);
+			break;
+		}
+		++channelIterator;
+	}
+	std::cout <<"sono qui 4" << std::endl;
+	return 0;
 }

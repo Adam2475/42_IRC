@@ -2,13 +2,15 @@
 #define SERVER_HPP
 
 #include "header.hpp"
-#include "User.hpp"
 #define PASS "PASS :"
 #define NICK "NICK"
+#define PART "PART"
 #define USER "USER"
 #define PRIVMSG "PRIVMSG"
 #define JOIN "JOIN"
 #define MODE "MODE"
+#include "Channel.hpp"
+
 /**
  * es. MODE #channel +i
  *
@@ -71,6 +73,15 @@ class Server
 		std::string findNickName(int clientFd) const;
 		std::string sendReceive(int clientSocket, std::string message);
 		void statusPrint(int i, int clientSocket);
+
+		// TODO: da vedere se tenerle
+		void    setPollIn(int targetFd);
+		void    setPollOut(int targetFd);
+
+		// commands
+		int		cmdJoin(std::stringstream &oss, User user);
+		int		cmdPrivateMsg(std::stringstream &oss, const std::string &senderNick);
+		int		cmdPart(std::stringstream &oss, int clientSocket);
 };
 
 
