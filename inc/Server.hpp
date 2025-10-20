@@ -9,6 +9,7 @@
 #define PRIVMSG "PRIVMSG"
 #define JOIN "JOIN"
 #define MODE "MODE"
+#define QUIT "QUIT"
 #include "Channel.hpp"
 
 /**
@@ -82,6 +83,7 @@ class Server
 		int		cmdJoin(std::stringstream &oss, User user);
 		int		cmdPrivateMsg(std::stringstream &oss, const std::string &senderNick);
 		int		cmdPart(std::stringstream &oss, int clientSocket);
+		int		cmdQuit(std::stringstream &oss, int clientSocket);
 };
 
 

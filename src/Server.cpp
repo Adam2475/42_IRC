@@ -253,6 +253,11 @@ void Server::accept_connections()
 						cmdPart(oss, clientSocket);
 						continue;
 					}
+					else if (word == QUIT)
+					{
+						cmdQuit(oss, clientSocket);
+						status = 0;
+					}
 
 					// TODO: se non ci sono comandi prima di un mess bisogna dare 421 ERR_UNKNOWNCOMMAND
 

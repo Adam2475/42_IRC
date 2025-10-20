@@ -243,3 +243,45 @@ int Server::cmdPart(std::stringstream &oss, int clientSocket)
 	std::cout <<"sono qui 4" << std::endl;
 	return 0;
 }
+
+int		Server::cmdQuit(std::stringstream &oss, int clientSocket)
+{
+	std::cout << "Detected command QUIT" << std::endl;
+
+	User quittingUser;
+    size_t user_idx = -1;
+    for (size_t i = 0; i < _users.size(); i++)
+    {
+        if (_users[i].getFd() == clientSocket)
+        {
+            quittingUser = _users[i];
+            user_idx = i;
+            break;
+        }
+    }
+
+	if (user_idx == -1) return 1;
+
+	std::string quit_msg;
+    std::getline(oss, quit_msg);
+    if (!quit_msg.empty() && quit_msg[0] == ' ')
+        quit_msg = quit_msg.substr(1);
+    if (quit_msg.empty() || quit_msg[0] != ':')
+    {
+        quit_msg = ":Client Quit";
+    }
+
+	std::string out = ":" + quittingUser.getNickName() + " QUIT " + quit_msg + "\r\n";
+
+    // Erasing the user from all channels
+    for (std::vector<Channel>::reverse_iterator it = _channels.rbegin(); it != _channels.rend(); ++it)
+    {
+        if (isInVector(quittingUser, it->getUserVector()))
+        {
+            it->writeToChannel(quittingUser, out);
+            it->partUser(quittingUser);
+        }
+    }
+
+	return (0);
+}

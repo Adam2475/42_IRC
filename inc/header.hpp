@@ -31,6 +31,6 @@ bool	isStrNotPrintable(const char *str);
 int     clearStrCRFL(std::string& received);
 void    pollIn(User& user);
 void    pollOut(User& user);
-bool	isInVector(User& user, std::vector<User>& vector);
+bool	isInVector(User& user, const std::vector<User>& vector);
 
 #endif

@@ -81,7 +81,7 @@ void User::setFd(int clientSocket)
 
 // Operators overload
 
-bool User::operator==(const User& other)
+bool User::operator==(const User& other) const
 {
 	if (_clientSocket == other.getFd())
 		return 1;

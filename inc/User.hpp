@@ -18,7 +18,7 @@ class User
 		User(std::string& userName, std::string& nickName, int clientSocket);
 		User(const User& other);
 		User& operator=(const User& other);
-		bool operator==(const User& other);
+		bool operator==(const User& other) const;
 		bool operator!=(const User& other);
 		~User();
 

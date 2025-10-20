@@ -65,7 +65,7 @@ void pollOut(User& user)
 	poll.events = POLLOUT;
 }
 
-bool	isInVector(User& user, std::vector<User>& vector)
+bool	isInVector(User& user, const std::vector<User>& vector)
 {
 	for (size_t i = 0; i < vector.size(); i++)
 	{
