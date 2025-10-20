@@ -42,38 +42,82 @@ int		Server::cmdPrivateMsg(std::stringstream &oss, const std::string &senderNick
 	std::string target;
 	std::string msgBody;
 	std::stringstream tss(targetsToken);
-	oss >> msgBody;
+	// oss >> msgBody;
+	// building message string
+	std::getline(oss, msgBody);
 	std::cout << "message body: " << msgBody << std::endl;
+	size_t sender_idx = 0;
+    for (size_t j = 0; j < _users.size(); ++j) {
+        if (_users[j].getNickName() == senderNick) {
+            sender_idx = j;
+            break;
+        }
+    }
 	while (std::getline(tss, target, ','))
 	{
+		bool is_channel = false;
 		if (target.empty())
 			return (1);
 		// find recipient fd by nickname
 		// int recipFd = -1;
-		size_t ui = 0;
-		while (ui < _users.size())
+		size_t i = 0;
+
+		if (target[0] == '#')
 		{
-			if (_users[ui].getNickName() == target)
+			is_channel = true;
+			std::cout << "channels_no: " << _channels.size() << "i: " << i << std::endl;
+			std::string channelName = target.substr(1);
+			while (i < _channels.size())
 			{
-				// recipFd = _users[ui].getFd();
-				break;
+				std::cout << "channel: " << _channels[i].getName() << "i: " << i << std::endl;
+				if (_channels[i].getName() == channelName)
+				{
+					// recipFd = _users[ui].getFd();
+					break;
+				}
+				i++;
 			}
-			ui++;
+			if (i == _channels.size())
+			{
+				//std::string err = "401 " + findNickName(clientSocket) + " " + singleTarget + " :No such nick/channel\r\n";
+				//send(clientSocket, err.c_str(), err.size(), 0);
+				std::cerr << "channel not found" << std::endl;
+				return (1);
+			}
 		}
-		if (ui == _users.size())
+		else
 		{
-			//std::string err = "401 " + findNickName(clientSocket) + " " + singleTarget + " :No such nick/channel\r\n";
-			//send(clientSocket, err.c_str(), err.size(), 0);
-			std::cerr << "user not found" << std::endl;
-			return (1);
+			while (i < _users.size())
+			{
+				if (_users[i].getNickName() == target)
+				{
+					// recipFd = _users[ui].getFd();
+					break;
+				}
+				i++;
+			}
+			if (i == _users.size())
+			{
+				//std::string err = "401 " + findNickName(clientSocket) + " " + singleTarget + " :No such nick/channel\r\n";
+				//send(clientSocket, err.c_str(), err.size(), 0);
+				std::cerr << "user not found" << std::endl;
+				return (1);
+			}
 		}
 		// poll_fds[recipFd]
 		// build and send the PRIVMSG to the recipient
 		std::string out = ":" + senderNick + " PRIVMSG " + target + " :" + msgBody + "\r\n";
 
-        pollOut(_users[ui]);
-		send(_users[ui].getFd(), out.c_str(), out.size(), 0);
-        pollIn(_users[ui]);
+		if (is_channel)
+		{
+			_channels[i].writeToChannel(_users[sender_idx], out);
+		}
+		else
+		{
+			pollOut(_users[i]);
+			send(_users[i].getFd(), out.c_str(), out.size(), 0);
+			pollIn(_users[i]);
+		}
 	}
     return (0);
 }
