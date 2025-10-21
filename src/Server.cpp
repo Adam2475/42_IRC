@@ -263,6 +263,10 @@ void Server::accept_connections()
 						cmdInvite(oss, clientSocket);
 						continue;
 					}
+					else if (word == KICK)
+					{
+						cmdKick(oss, clientSocket);
+					}
 
 					// TODO: se non ci sono comandi prima di un mess bisogna dare 421 ERR_UNKNOWNCOMMAND
 

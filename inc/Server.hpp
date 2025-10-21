@@ -11,6 +11,7 @@
 #define JOIN "JOIN"
 #define MODE "MODE"
 #define QUIT "QUIT"
+#define KICK "KICK"
 #include "Channel.hpp"
 
 /**
@@ -88,6 +89,7 @@ class Server
 		int		cmdPart(std::stringstream &oss, int clientSocket);
 		int		cmdInvite(std::stringstream &oss, int clientSocket);
 		int		cmdQuit(std::stringstream &oss, int clientSocket);
+		int		cmdKick(std::stringstream &oss, int clientSocket);
 };
 
 

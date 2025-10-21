@@ -61,15 +61,15 @@ int		Server::cmdPrivateMsg(std::stringstream &oss, const std::string &senderNick
 		// find recipient fd by nickname
 		// int recipFd = -1;
 		size_t i = 0;
-
+ 
 		if (target[0] == '#')
 		{
 			is_channel = true;
-			std::cout << "channels_no: " << _channels.size() << "i: " << i << std::endl;
+			std::cout << "channels_no: " << _channels.size() << " i: " << i << std::endl;
 			std::string channelName = target.substr(1);
 			while (i < _channels.size())
 			{
-				std::cout << "channel: " << _channels[i].getName() << "i: " << i << std::endl;
+				std::cout << "channel: " << _channels[i].getName() << " i: " << i << std::endl;
 				if (_channels[i].getName() == channelName)
 				{
 					// recipFd = _users[ui].getFd();
@@ -114,9 +114,11 @@ int		Server::cmdPrivateMsg(std::stringstream &oss, const std::string &senderNick
 		}
 		else
 		{
-			pollOut(_users[i]);
+			// pollOut(_users[i]);
+			setPollOut(_users[i].getFd());
 			send(_users[i].getFd(), out.c_str(), out.size(), 0);
-			pollIn(_users[i]);
+			setPollIn(_users[i].getFd());
+			// pollIn(_users[i]);
 		}
 	}
     return (0);
@@ -182,7 +184,8 @@ int		Server::cmdJoin(std::stringstream &oss, User user)
 	{
 		std::cout << channelName << "channel not found, creating..." << std::endl;
 		// name, pass, creator, topic, max users, invite_only, topic restriction
-		_channels.push_back(Channel(channelName, pass, user, topic, 100, 0, 0));
+		Channel new_channel(channelName, pass, user, topic, 100, 0, 0);
+		_channels.push_back(new_channel);
 	}
 	std::cout << token << std::endl;
 
@@ -326,4 +329,9 @@ int		Server::cmdInvite(std::stringstream &oss, int clientSocket)
 	std::cout << "found user: " << targetUser.getNickName() << std::endl;
 
 	return (0);
+}
+
+int		Server::cmdKick(std::stringstream &oss, int clientSocket)
+{
+	return 0;
 }
