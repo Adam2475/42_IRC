@@ -196,3 +196,8 @@ void Channel::writeToChannel(User& user, std::string& buffer)
 		pollIn(*it);
 	}
 }
+
+std::string	Channel::getTopic() const
+{
+	return _topic;
+}
