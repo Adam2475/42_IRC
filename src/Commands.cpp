@@ -152,12 +152,27 @@ int		Server::cmdJoin(std::stringstream &oss, User user)
 		if (channelName == channelIterator->getName())
 		{
 			std::cout << "channel found" << std::endl;
-			channelIterator->addUserToChannel(user, pass);
-			pollOut(user);
-			std::string msg = "Welcome to #" + channelIterator->getName() + "!\n";
-			send(user.getFd(), msg.c_str(), msg.size(), 0);
-			pollIn(user);
-			return 0;
+            channelIterator->addUserToChannel(user, pass);
+            
+            // Standard IRC Replies for JOIN
+            std::string join_msg = ":" + user.getNickName() + " JOIN #" + channelName + "\r\n";
+            channelIterator->writeToChannel(user, join_msg); // Send to all users in channel
+
+            std::string topic_msg = ":irc.local 332 " + user.getNickName() + " #" + channelName + " :" + channelIterator->getTopic() + "\r\n";
+            send(user.getFd(), topic_msg.c_str(), topic_msg.size(), 0);
+
+            std::string users_list;
+            std::vector<User> channel_users = channelIterator->getUserVector();
+            for(size_t i = 0; i < channel_users.size(); ++i) {
+                users_list += channel_users[i].getNickName() + " ";
+            }
+            
+            std::string namreply_msg = ":irc.local 353 " + user.getNickName() + " = #" + channelName + " :" + users_list + "\r\n";
+            send(user.getFd(), namreply_msg.c_str(), namreply_msg.size(), 0);
+
+            std::string endofnames_msg = ":irc.local 366 " + user.getNickName() + " #" + channelName + " :End of /NAMES list.\r\n";
+            send(user.getFd(), endofnames_msg.c_str(), endofnames_msg.size(), 0);
+			return (0);
 		}
 		++channelIterator;
 	}

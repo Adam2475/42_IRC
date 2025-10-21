@@ -37,7 +37,7 @@ class Channel
 		void	writeToChannel(User& user, std::string& buffer);
 		// void	inviteUser(User& user, User& user_operator);
 		// void	setTopic(std::string& passwd, User& user_operator);
-		// void	setTopic(std::string& passwd, User& user_operator);
+		std::string	getTopic() const;
 		// void	removeTopicRestriction(User& user_operator);
 		// void	removeTopic(User& user_operator);
 		// void	setPasswd(std::string& passwd, User& user_operator);
