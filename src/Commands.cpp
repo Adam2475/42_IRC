@@ -239,7 +239,6 @@ int Server::cmdPart(std::stringstream &oss, int clientSocket)
 			}
 			else
 			{
-
 				std::cout << "sono qui 3 vect size = " << channelIterator->getUserVector().size() << std::endl;
 				pollOut(user);
 				std::string msg = "Didn't work!\n";
@@ -297,6 +296,34 @@ int		Server::cmdQuit(std::stringstream &oss, int clientSocket)
             it->partUser(quittingUser);
         }
     }
+
+	return (0);
+}
+
+int		Server::cmdInvite(std::stringstream &oss, int clientSocket)
+{
+	std::string targetNick;
+	std::string channelName;
+
+	oss >> targetNick >> channelName;
+
+	if (targetNick.empty() || channelName.empty())
+	{
+		// ERR_NEEDMOREPARAMS (461)
+		std::cout << "wrong number of arguments" << std::endl;
+		return (1);
+	}
+
+	// finding target user
+	User targetUser = findUserByNick(targetNick);
+	bool targetFound = false;
+	// can't compare objects to NULL; check a property instead (e.g. nickname)
+	if (!targetUser.getNickName().empty())
+		targetFound = true;
+	else
+		std::cout << "user not found" << std::endl;
+
+	std::cout << "found user: " << targetUser.getNickName() << std::endl;
 
 	return (0);
 }

@@ -258,6 +258,11 @@ void Server::accept_connections()
 						cmdQuit(oss, clientSocket);
 						status = 0;
 					}
+					else if (word == INVITE)
+					{
+						cmdInvite(oss, clientSocket);
+						continue;
+					}
 
 					// TODO: se non ci sono comandi prima di un mess bisogna dare 421 ERR_UNKNOWNCOMMAND
 
@@ -275,6 +280,20 @@ void Server::accept_connections()
 			}
 		}
 	}
+}
+
+User	Server::findUserByNick(std::string targetNick)
+{
+	User targetUser;
+    for (size_t i = 0; i < _users.size(); ++i)
+	{
+        if (_users[i].getNickName() == targetNick)
+		{
+            targetUser = _users[i];
+            break;
+        }
+    }
+	return targetUser;
 }
 
 

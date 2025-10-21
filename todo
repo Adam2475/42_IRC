@@ -30,8 +30,10 @@ Questo include:
 
 programma si rompe interrompendo la registrazione
 
-- [ ] add the PRIVMSG for #channels
+- [ ] add the PRIVMSG for '#channels'
 
 - add notice when user enters a channel
 
-- channel PRIVMSG not showing on konversation
+- channel PRIVMSG not showing on konversation | OK
+
+- QUIT doesn't exit from the client (?)
