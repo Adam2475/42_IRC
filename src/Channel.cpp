@@ -201,3 +201,11 @@ std::string	Channel::getTopic() const
 {
 	return _topic;
 }
+
+void Channel::addToInvited(User& user)
+{
+    if (!isInVector(user, _invited_users))
+    {
+        _invited_users.push_back(user);
+    }
+}

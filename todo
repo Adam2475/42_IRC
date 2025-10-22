@@ -37,3 +37,7 @@ programma si rompe interrompendo la registrazione
 - channel PRIVMSG not showing on konversation | OK
 
 - QUIT doesn't exit from the client (?)
+
+- ignore initial CAP LS message from konversation
+
+- add check for invitation only in JOIN

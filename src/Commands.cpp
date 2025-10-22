@@ -160,7 +160,7 @@ int		Server::cmdJoin(std::stringstream &oss, User user)
             std::string join_msg = ":" + user.getNickName() + " JOIN #" + channelName + "\r\n";
             channelIterator->writeToChannel(user, join_msg); // Send to all users in channel
 
-            std::string topic_msg = ":irc.local 332 " + user.getNickName() + " #" + channelName + " :" + channelIterator->getTopic() + "\r\n";
+            std::string topic_msg = ":server 332 " + user.getNickName() + " #" + channelName + " :" + channelIterator->getTopic() + "\r\n";
             send(user.getFd(), topic_msg.c_str(), topic_msg.size(), 0);
 
             std::string users_list;
@@ -169,10 +169,10 @@ int		Server::cmdJoin(std::stringstream &oss, User user)
                 users_list += channel_users[i].getNickName() + " ";
             }
             
-            std::string namreply_msg = ":irc.local 353 " + user.getNickName() + " = #" + channelName + " :" + users_list + "\r\n";
+            std::string namreply_msg = ":server 353 " + user.getNickName() + " = #" + channelName + " :" + users_list + "\r\n";
             send(user.getFd(), namreply_msg.c_str(), namreply_msg.size(), 0);
 
-            std::string endofnames_msg = ":irc.local 366 " + user.getNickName() + " #" + channelName + " :End of /NAMES list.\r\n";
+            std::string endofnames_msg = ":server 366 " + user.getNickName() + " #" + channelName + " :End of /NAMES list.\r\n";
             send(user.getFd(), endofnames_msg.c_str(), endofnames_msg.size(), 0);
 			// return (0);
 		}
@@ -191,13 +191,13 @@ int		Server::cmdJoin(std::stringstream &oss, User user)
         std::string join_msg = ":" + user.getNickName() + " JOIN #" + channelName + "\r\n";
         send(user.getFd(), join_msg.c_str(), join_msg.size(), 0);
 
-        std::string topic_msg = ":irc.local 332 " + user.getNickName() + " #" + channelName + " :" + topic + "\r\n";
+        std::string topic_msg = ":server 332 " + user.getNickName() + " #" + channelName + " :" + topic + "\r\n";
         send(user.getFd(), topic_msg.c_str(), topic_msg.size(), 0);
 
-        std::string namreply_msg = ":irc.local 353 " + user.getNickName() + " = #" + channelName + " :" + user.getNickName() + "\r\n";
+        std::string namreply_msg = ":server 353 " + user.getNickName() + " = #" + channelName + " :" + user.getNickName() + "\r\n";
         send(user.getFd(), namreply_msg.c_str(), namreply_msg.size(), 0);
 
-        std::string endofnames_msg = ":irc.local 366 " + user.getNickName() + " #" + channelName + " :End of /NAMES list.\r\n";
+        std::string endofnames_msg = ":server 366 " + user.getNickName() + " #" + channelName + " :End of /NAMES list.\r\n";
         send(user.getFd(), endofnames_msg.c_str(), endofnames_msg.size(), 0);
 	}
 	std::cout << token << std::endl;
@@ -312,16 +312,34 @@ int		Server::cmdQuit(std::stringstream &oss, int clientSocket)
             it->partUser(quittingUser);
         }
     }
-
 	return (0);
+}
+
+Channel*	Server::findChannelByName(std::string channelName)
+{
+	Channel targetChannel;
+ 	for (std::vector<Channel>::iterator it = _channels.begin(); it != _channels.end(); ++it)
+	{
+        if (it->getName() == channelName)
+		{
+            return &(*it);
+        }
+    }
+	return NULL;
 }
 
 int		Server::cmdInvite(std::stringstream &oss, int clientSocket)
 {
 	std::string targetNick;
 	std::string channelName;
-
 	oss >> targetNick >> channelName;
+	User inviter = getUserByFd(clientSocket);
+	User targetUser = findUserByNick(targetNick);
+	if (channelName[0] == '#')
+	{
+        channelName = channelName.substr(1);
+    }
+	Channel *targetChannel = findChannelByName(channelName);
 
 	if (targetNick.empty() || channelName.empty())
 	{
@@ -329,17 +347,51 @@ int		Server::cmdInvite(std::stringstream &oss, int clientSocket)
 		std::cout << "wrong number of arguments" << std::endl;
 		return (1);
 	}
-
-	// finding target user
-	User targetUser = findUserByNick(targetNick);
-	bool targetFound = false;
-	// can't compare objects to NULL; check a property instead (e.g. nickname)
-	if (!targetUser.getNickName().empty())
-		targetFound = true;
-	else
+	
+	if (targetUser.getNickName().empty())
+	{
 		std::cout << "user not found" << std::endl;
+		//"err 401"
+		return (1);
+	}
 
 	std::cout << "found user: " << targetUser.getNickName() << std::endl;
+	std::cout << channelName << std::endl;
+
+	if (targetChannel == NULL)
+	{
+		std::cout << "channel not found" << std::endl;
+		// "err 403"
+		return (1);
+	}
+
+	// checks
+
+	// Check if inviter is on the channel
+    if (!isInVector(inviter, targetChannel->getUserVector())) {
+        std::string err = ":irc.local 442 " + inviter.getNickName() + " #" + channelName + " :You're not on that channel\r\n";
+        send(clientSocket, err.c_str(), err.size(), 0);
+        return 1;
+    }
+
+	// Check if target is already on the channel
+    if (isInVector(targetUser, targetChannel->getUserVector())) {
+        std::string err = ":irc.local 443 " + inviter.getNickName() + " " + targetNick + " #" + channelName + " :is already on channel\r\n";
+        send(clientSocket, err.c_str(), err.size(), 0);
+        return 1;
+    }
+
+	// send invite
+	targetChannel->addToInvited(targetUser);
+
+	// Send RPL_INVITING to inviter
+    std::string inviting_msg = ":irc.local 341 " + inviter.getNickName() + " " + targetNick + " #" + channelName + "\r\n";
+    send(clientSocket, inviting_msg.c_str(), inviting_msg.size(), 0);
+
+    // Send INVITE to target user
+    std::string invite_msg = ":" + inviter.getNickName() + " INVITE " + targetNick + " :#" + channelName + "\r\n";
+    send(targetUser.getFd(), invite_msg.c_str(), invite_msg.size(), 0);
+
 
 	return (0);
 }

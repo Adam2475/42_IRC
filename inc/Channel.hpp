@@ -12,6 +12,9 @@ class Channel
 		std::string		_topic;
 		unsigned int	_max_users;
 
+		// list of invited users
+		std::vector<User> _invited_users;
+
 		// MODE
 		// TODO: da settare a false al costruttore
 		bool		_invite_only;
@@ -44,6 +47,7 @@ class Channel
 		// void	removePasswd(std::string& passwd, User& user_operator);
 		// void	givePrivilageOpt(std::string& userName, User& user_operator);
 		// void	removePrivilageOpt(std::string& userName, User& user_operator);
+		void	addToInvited(User& user);
 };
 
 #endif

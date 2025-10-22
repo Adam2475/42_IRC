@@ -66,11 +66,12 @@ class Server
 
 		///////////////////////////
 		// Public methods
-		int 	server_start();
-		User	userCreation(int clientSocket);
-		void 	accept_connections();
-		User	findUserByNick(std::string targetNick);
-		User	getUserByFd(int clientSocket);
+		int 		server_start();
+		User		userCreation(int clientSocket);
+		void 		accept_connections();
+		User		findUserByNick(std::string targetNick);
+		User		getUserByFd(int clientSocket);
+		Channel*	findChannelByName(std::string channelName);
 
 		///////////////////////////
 		// Getters & Setters
