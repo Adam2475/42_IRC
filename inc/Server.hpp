@@ -70,6 +70,7 @@ class Server
 		User	userCreation(int clientSocket);
 		void 	accept_connections();
 		User	findUserByNick(std::string targetNick);
+		User	getUserByFd(int clientSocket);
 
 		///////////////////////////
 		// Getters & Setters

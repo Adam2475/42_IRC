@@ -132,6 +132,19 @@ void Server::statusPrint(int i, int clientSocket)
 	clients--;
 }
 
+User Server::getUserByFd(int clientSocket)
+{
+	User targetUser;
+	for (size_t ui = 0; ui < _users.size(); ++ui)
+	{
+		if (_users[ui].getFd() == clientSocket)
+		{
+			targetUser = _users[ui]; // copy
+		}
+	}
+	return targetUser;
+}
+
 void Server::accept_connections()
 {
 	// hold the fd of a connected client socket
@@ -223,7 +236,7 @@ void Server::accept_connections()
 					}
 					if(clearStrCRFL(received))
 					{
-						continue ;
+						continue;
 					}
 					std::stringstream oss(received);
 					std::cout << "received: " << received << std::endl;
@@ -232,21 +245,14 @@ void Server::accept_connections()
 					if (word == PRIVMSG)
 					{
 						if (cmdPrivateMsg(oss, findNickName(clientSocket)))
-							continue ;
+							continue;
 					}
 					else if (word == JOIN)
 					{
-						// find creator User in users vector (prefer by fd, fallback by nick)
 						User joiningUser;
-						for (size_t ui = 0; ui < _users.size(); ++ui)
-                        {
-                            if (_users[ui].getFd() == clientSocket)
-                            {
-                                joiningUser = _users[ui]; // copy
-                            }
-                        }
+						joiningUser = getUserByFd(clientSocket);
 						if (cmdJoin(oss, joiningUser))
-							continue ;
+							continue;
 					}
 					else if (word == PART)
 					{
@@ -257,6 +263,7 @@ void Server::accept_connections()
 					{
 						cmdQuit(oss, clientSocket);
 						status = 0;
+						continue;
 					}
 					else if (word == INVITE)
 					{

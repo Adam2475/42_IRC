@@ -174,7 +174,7 @@ int		Server::cmdJoin(std::stringstream &oss, User user)
 
             std::string endofnames_msg = ":irc.local 366 " + user.getNickName() + " #" + channelName + " :End of /NAMES list.\r\n";
             send(user.getFd(), endofnames_msg.c_str(), endofnames_msg.size(), 0);
-			return (0);
+			// return (0);
 		}
 		++channelIterator;
 	}
@@ -186,6 +186,19 @@ int		Server::cmdJoin(std::stringstream &oss, User user)
 		// name, pass, creator, topic, max users, invite_only, topic restriction
 		Channel new_channel(channelName, pass, user, topic, 100, 0, 0);
 		_channels.push_back(new_channel);
+
+		// Standard IRC Replies for successful channel creation and join
+        std::string join_msg = ":" + user.getNickName() + " JOIN #" + channelName + "\r\n";
+        send(user.getFd(), join_msg.c_str(), join_msg.size(), 0);
+
+        std::string topic_msg = ":irc.local 332 " + user.getNickName() + " #" + channelName + " :" + topic + "\r\n";
+        send(user.getFd(), topic_msg.c_str(), topic_msg.size(), 0);
+
+        std::string namreply_msg = ":irc.local 353 " + user.getNickName() + " = #" + channelName + " :" + user.getNickName() + "\r\n";
+        send(user.getFd(), namreply_msg.c_str(), namreply_msg.size(), 0);
+
+        std::string endofnames_msg = ":irc.local 366 " + user.getNickName() + " #" + channelName + " :End of /NAMES list.\r\n";
+        send(user.getFd(), endofnames_msg.c_str(), endofnames_msg.size(), 0);
 	}
 	std::cout << token << std::endl;
 
