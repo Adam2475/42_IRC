@@ -164,6 +164,7 @@ int		Server::cmdJoin(std::stringstream &oss, User user)
             send(user.getFd(), topic_msg.c_str(), topic_msg.size(), 0);
 
             std::string users_list;
+			
             std::vector<User> channel_users = channelIterator->getUserVector();
             for(size_t i = 0; i < channel_users.size(); ++i) {
                 users_list += channel_users[i].getNickName() + " ";
@@ -174,7 +175,7 @@ int		Server::cmdJoin(std::stringstream &oss, User user)
 
             std::string endofnames_msg = ":server 366 " + user.getNickName() + " #" + channelName + " :End of /NAMES list.\r\n";
             send(user.getFd(), endofnames_msg.c_str(), endofnames_msg.size(), 0);
-			// return (0);
+			return (0);
 		}
 		++channelIterator;
 	}
@@ -279,18 +280,7 @@ int		Server::cmdQuit(std::stringstream &oss, int clientSocket)
 	std::cout << "Detected command QUIT" << std::endl;
 
 	User quittingUser;
-    size_t user_idx = -1;
-    for (size_t i = 0; i < _users.size(); i++)
-    {
-        if (_users[i].getFd() == clientSocket)
-        {
-            quittingUser = _users[i];
-            user_idx = i;
-            break;
-        }
-    }
-
-	if (user_idx == -1) return 1;
+    quittingUser = getUserByFd(clientSocket);
 
 	std::string quit_msg;
     std::getline(oss, quit_msg);
@@ -312,6 +302,31 @@ int		Server::cmdQuit(std::stringstream &oss, int clientSocket)
             it->partUser(quittingUser);
         }
     }
+
+	// send back QUIT message to client
+	send(clientSocket, out.c_str(), out.size(), 0);
+
+	// remove poll fd and close socket
+    for (size_t i = 0; i < poll_fds.size(); ++i)
+    {
+        if (poll_fds[i].fd == clientSocket)
+        {
+            close(poll_fds[i].fd);
+            poll_fds.erase(poll_fds.begin() + i);
+            break;
+        }
+    }
+
+    // remove user from _users
+    for (size_t i = 0; i < _users.size(); ++i)
+    {
+        if (_users[i].getFd() == clientSocket)
+        {
+            _users.erase(_users.begin() + i);
+            break;
+        }
+    }
+
 	return (0);
 }
 
@@ -369,14 +384,14 @@ int		Server::cmdInvite(std::stringstream &oss, int clientSocket)
 
 	// Check if inviter is on the channel
     if (!isInVector(inviter, targetChannel->getUserVector())) {
-        std::string err = ":irc.local 442 " + inviter.getNickName() + " #" + channelName + " :You're not on that channel\r\n";
+        std::string err = ":server 442 " + inviter.getNickName() + " #" + channelName + " :You're not on that channel\r\n";
         send(clientSocket, err.c_str(), err.size(), 0);
         return 1;
     }
 
 	// Check if target is already on the channel
     if (isInVector(targetUser, targetChannel->getUserVector())) {
-        std::string err = ":irc.local 443 " + inviter.getNickName() + " " + targetNick + " #" + channelName + " :is already on channel\r\n";
+        std::string err = ":server 443 " + inviter.getNickName() + " " + targetNick + " #" + channelName + " :is already on channel\r\n";
         send(clientSocket, err.c_str(), err.size(), 0);
         return 1;
     }
@@ -385,7 +400,7 @@ int		Server::cmdInvite(std::stringstream &oss, int clientSocket)
 	targetChannel->addToInvited(targetUser);
 
 	// Send RPL_INVITING to inviter
-    std::string inviting_msg = ":irc.local 341 " + inviter.getNickName() + " " + targetNick + " #" + channelName + "\r\n";
+    std::string inviting_msg = ":server 341 " + inviter.getNickName() + " " + targetNick + " #" + channelName + "\r\n";
     send(clientSocket, inviting_msg.c_str(), inviting_msg.size(), 0);
 
     // Send INVITE to target user
