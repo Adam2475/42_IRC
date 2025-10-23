@@ -34,6 +34,12 @@ std::vector<User> Channel::getUserVector() const
 	return new_vect;
 }
 
+std::vector<User> Channel::getUserOperatorsVector() const
+{
+	std::vector<User> new_vect(_operators_vector);
+	return new_vect;
+}
+
 std::string Channel::getName() const
 {
 	return _name;
@@ -183,6 +189,17 @@ void	Channel::partUser(User& user)
 		{
 			_user_vector.erase(it);
 			break;
+		}
+	}
+	if (isInVector(user, _operators_vector))
+	{
+		for (std::vector<User>::iterator it = _operators_vector.begin(); it != _operators_vector.end(); ++it)
+		{
+			if (user == *it)
+			{
+				_operators_vector.erase(it);
+				break;
+			}
 		}
 	}
 }

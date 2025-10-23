@@ -5,10 +5,13 @@
 
 #include <iostream>
 #include <sstream>
+#include <ostream>
 #include <string> // for string type
 #include <vector>
 #include <deque>
 #include <map>
+#include <iomanip>
+
 
 #include <unistd.h> // for atoi
 #include <fcntl.h>  // for fcntl(), F_GETFL, F_SETFL, O_NONBLOCK

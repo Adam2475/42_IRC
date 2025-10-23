@@ -1,14 +1,7 @@
 IRCSERV
-- [x] start server e registrazione dei client
-- [ ] scrittura primi User su page principale
-- [ ] aggiungere accept_connection in server.hpp
 - [ ] creare una funzione di scrittura messaggi del server e altri
 
 - [ ] IL LIMITE DEI MESSAGGI PER RFC È 512 SENNÒ È ERRORE
-
-
-- [ ] creazione channel
-- [ ] creazione specifiche channel: topic, invite only, operators ecc..
 
 Then, you have to implement the commands that are specific to channel
 operators:
@@ -19,14 +12,6 @@ operators:
         · i: Set/remove Invite-only channel
         · t: Set/remove the restrictions of the TOPIC command to channel operators
         · k: Set/remove the channel key (password)
-
-Ogni messaggio IRC (comando, PRIVMSG, ecc.) non può superare 512 byte.
-
-Questo include:
-    - il prefisso ':' (se c’è)
-    - il comando
-    - i parametri
-    - il \r\n finale.
 
 programma si rompe interrompendo la registrazione
 
@@ -40,4 +25,6 @@ programma si rompe interrompendo la registrazione
 
 - ignore initial CAP LS message from konversation
 
-- add check for invitation only in JOIN
+- add check for invitation only in JOIN (MODE command)
+
+- PART and PRIVMSG not working as expected on telnet

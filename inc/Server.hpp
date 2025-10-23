@@ -83,6 +83,8 @@ class Server
 		// TODO: da vedere se tenerle
 		void    setPollIn(int targetFd);
 		void    setPollOut(int targetFd);
+		void	sendNumeric(int clientSocket, int code, const std::string& arg, const std::string& msg);
+
 
 		/////////////////////////////
 		// Commands

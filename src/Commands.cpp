@@ -396,7 +396,66 @@ int		Server::cmdInvite(std::stringstream &oss, int clientSocket)
 	return (0);
 }
 
+void Server::sendNumeric(int clientSocket, int code, const std::string& arg, const std::string& msg)
+{
+    User user = getUserByFd(clientSocket);
+
+    std::ostringstream oss;
+    oss << ":" << ":irc.local" << " " 
+        << std::setfill('0') << std::setw(3) << code << " "
+        << user.getNickName() << " " 
+        << arg << " " << msg << "\r\n";
+
+    std::string reply = oss.str();
+    send(clientSocket, reply.c_str(), reply.size(), 0);
+}
+
 int		Server::cmdKick(std::stringstream &oss, int clientSocket)
 {
+	// KICK <channel> <nick> [<reason>]
+	std::string targetNick;
+	std::string channelName;
+	oss >> channelName >> targetNick;
+	User kicker = getUserByFd(clientSocket);
+	User targetUser = findUserByNick(targetNick);
+	if (channelName.empty() || targetNick.empty())
+	{
+		// ERR_NEEDMOREPARAMS (461)
+		sendNumeric(clientSocket, 461, "ERR_NEEDMOREPARAMS:", "more params needed");
+		std::cout << "need more params" << std::endl;
+		return 1;
+	}
+	Channel *targetChannel = findChannelByName(channelName);
+
+	if (channelName[0] != '#' || targetChannel == NULL)
+	{
+		// ERR_NOSUCHCHANNEL (403)
+		std::cout << "no such channel" << std::endl;
+		return 1;
+    }
+	
+	channelName = channelName.substr(1);
+	std::vector<User> channelUsers = targetChannel->getUserVector();
+	std::vector<User> channelOperators = targetChannel->getUserOperatorsVector();
+	if (!isInVector(kicker, channelUsers))
+	{
+		// ERR_NOTONCHANNEL (442)
+		std::cout << "kicker not on channel" << std::endl;
+		return 1;
+	}
+	if (!isInVector(kicker, channelOperators))
+	{
+		// ERR_CHANOPRIVSNEEDED (482)
+		std::cout << "kicker not an operator" << std::endl;
+		return 1;
+	}
+	if (!isInVector(targetUser, channelUsers))
+	{
+		// ERR_USERNOTINCHANNEL (441)
+		std::cout << "user not in channel" << std::endl;
+	}
+
+	targetChannel->partUser(targetUser);
+
 	return 0;
 }
