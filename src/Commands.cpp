@@ -171,10 +171,12 @@ int		Server::cmdJoin(std::stringstream &oss, User user)
             }
             
             std::string namreply_msg = ":server 353 " + user.getNickName() + " = #" + channelName + " :" + users_list + "\r\n";
-            send(user.getFd(), namreply_msg.c_str(), namreply_msg.size(), 0);
+            //send(user.getFd(), namreply_msg.c_str(), namreply_msg.size(), 0);
+			channelIterator->writeToChannel(user, namreply_msg);
 
             std::string endofnames_msg = ":server 366 " + user.getNickName() + " #" + channelName + " :End of /NAMES list.\r\n";
-            send(user.getFd(), endofnames_msg.c_str(), endofnames_msg.size(), 0);
+            //send(user.getFd(), endofnames_msg.c_str(), endofnames_msg.size(), 0);
+			channelIterator->writeToChannel(user, endofnames_msg);
 			return (0);
 		}
 		++channelIterator;
