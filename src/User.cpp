@@ -6,7 +6,7 @@ User::User()
 {
 }
 
-User::User(std::string& userName, std::string& nickName, int clientSocket) : _userName(userName), _nickName(nickName), _clientSocket(clientSocket)
+User::User(std::string& userName, std::string& nickName, int clientSocket, const std::string &hostname) : _userName(userName), _nickName(nickName), _clientSocket(clientSocket), _hostname(hostname)
 {
 	setPollFd(clientSocket);
 }
@@ -67,6 +67,11 @@ void User::setPollFd(int clientSocket)
 	_pollfd.fd = clientSocket;
 	_pollfd.events = POLLIN;
 	_pollfd.revents = 0;
+}
+
+std::string User::getHostName() const
+{
+    return this->_hostname;
 }
 
 int User::getFd() const

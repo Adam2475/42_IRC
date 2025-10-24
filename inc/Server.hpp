@@ -36,7 +36,7 @@
 	| **TOPIC**       | imposta o mostra il topic del canale               | `TOPIC #chat :Benvenuti!`            |
 	| **KICK**        | rimuove un utente dal canale                       | `KICK #chat bob :Rule violation`     |
 	| **INVITE**      | invita un utente a un canale                       | `INVITE bob #chat`                   | OK
-	| **QUIT**        | disconnette l’utente                               | `QUIT :Client exiting`               |
+	| **QUIT**        | disconnette l’utente                               | `QUIT :Client exiting`               | OK
 
  */ 
 // #define USER "USER"
@@ -67,11 +67,12 @@ class Server
 		///////////////////////////
 		// Public methods
 		int 		server_start();
-		User		userCreation(int clientSocket);
+		User		userCreation(int clientSocket, std::string &hostname);
 		void 		accept_connections();
 		User		findUserByNick(std::string targetNick);
 		User		getUserByFd(int clientSocket);
 		Channel*	findChannelByName(std::string channelName);
+		void		disconnectClient(int clientSocket, std::string quitMessage);
 
 		///////////////////////////
 		// Getters & Setters
@@ -84,7 +85,6 @@ class Server
 		void    setPollIn(int targetFd);
 		void    setPollOut(int targetFd);
 		void	sendNumeric(int clientSocket, int code, const std::string& arg, const std::string& msg);
-
 
 		/////////////////////////////
 		// Commands

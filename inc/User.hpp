@@ -10,12 +10,13 @@ class User
 	private:
 		std::string _userName;
 		std::string _nickName;
+		std::string _hostname;
 		struct pollfd _pollfd;
 		int _clientSocket;
 		
 	public:
 		User();
-		User(std::string& userName, std::string& nickName, int clientSocket);
+		User(std::string& userName, std::string& nickName, int clientSocket, const std::string& hostname);
 		User(const User& other);
 		User& operator=(const User& other);
 		bool operator==(const User& other) const;
@@ -32,6 +33,7 @@ class User
 		void			setPollFd(int clientSocket);
 		int				getFd() const;
 		void			setFd(int clientSocket);
+		std::string		getHostName() const;
 };
 
 #endif

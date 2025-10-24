@@ -28,3 +28,5 @@ programma si rompe interrompendo la registrazione
 - add check for invitation only in JOIN (MODE command)
 
 - PART and PRIVMSG not working as expected on telnet
+
+- PART cmd don't remove user from channel user list

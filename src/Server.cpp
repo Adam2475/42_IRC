@@ -98,7 +98,62 @@ std::string Server::sendReceive(int clientSocket, std::string message)
 	return empty;
 }
 
-User Server::userCreation(int clientSocket)
+void Server::disconnectClient(int clientSocket, std::string quitMessage)
+{
+	User quittingUser = getUserByFd(clientSocket);
+    if (quittingUser.getNickName().empty())
+	{
+        // User may not be fully registered, or already cleaned up.
+        // Just ensure the socket is closed and removed from poll list.
+        for (size_t i = 0; i < poll_fds.size(); ++i)
+		{
+            if (poll_fds[i].fd == clientSocket)
+			{
+                close(poll_fds[i].fd);
+                poll_fds.erase(poll_fds.begin() + i);
+                break;
+            }
+        }
+        return;
+    }
+
+    std::string out = ":" + quittingUser.getNickName() + " QUIT :" + quitMessage + "\r\n";
+
+    // Erase the user from all channels and notify members
+    for (std::vector<Channel>::iterator it = _channels.begin(); it != _channels.end(); ++it)
+	{
+        if (isInVector(quittingUser, it->getUserVector()))
+		{
+            it->writeToChannel(quittingUser, out);
+            it->partUser(quittingUser);
+        }
+    }
+
+    // Remove poll fd and close socket
+    for (size_t i = 0; i < poll_fds.size(); ++i)
+	{
+        if (poll_fds[i].fd == clientSocket)
+		{
+            close(poll_fds[i].fd);
+            poll_fds.erase(poll_fds.begin() + i);
+            break;
+        }
+    }
+
+    // Remove user from _users vector
+    for (size_t i = 0; i < _users.size(); ++i)
+	{
+        if (_users[i].getFd() == clientSocket)
+		{
+            _users.erase(_users.begin() + i);
+            break;
+        }
+    }
+
+    std::cout << "Client " << clientSocket << " (" << quittingUser.getNickName() << ") disconnected." << std::endl;
+}
+
+User Server::userCreation(int clientSocket, std::string &hostname)
 {
 	bool flag = false;
 	std::string pass;
@@ -120,7 +175,7 @@ User Server::userCreation(int clientSocket)
 		std::cout << pass << ' ' << nick << ' ' << user << std::endl;
 		flag = true;
 	}
-	return User(user, nick, clientSocket);
+	return User(user, nick, clientSocket, hostname);
 }
 
 void Server::statusPrint(int i, int clientSocket)
@@ -187,8 +242,12 @@ void Server::accept_connections()
 			// if there is a new connection accept it
 			if (clientSocket > 0)
 			{
+
+                // Get the client's IP address and use it as the hostname
+                std::string hostname = inet_ntoa(client_addr.sin_addr);
+
 				std::cout << "new connection accepted" << std::endl;   
-				User new_user = this->userCreation(clientSocket);
+				User new_user = this->userCreation(clientSocket, hostname);
 				_users.push_back(new_user);
 				// std::cout << buffer << "user created successfully";
 				// add new client to poll_fds
@@ -219,7 +278,8 @@ void Server::accept_connections()
 					}
 					if (status <= 0)
 					{
-						statusPrint(i, clientSocket);
+						//statusPrint(i, clientSocket);
+						disconnectClient(poll_fds[i].fd, "Connection closed");
 						i--;
 						continue;
 					}
@@ -285,7 +345,9 @@ void Server::accept_connections()
 				}
 				else if (status == 0)  // ADD: Handle client disconnection
 				{
-					statusPrint(i, clientSocket);
+					std::cout << "status == 0" << std::endl;
+					//statusPrint(i, clientSocket);
+					disconnectClient(poll_fds[i].fd, "Connection closed");
 					i--; // Adjust index after erasing
 				}
 			}
