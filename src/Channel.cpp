@@ -181,8 +181,10 @@ void	Channel::kickUser(User &user, User &user_operator)
 	}
 }
 
-void	Channel::partUser(User& user)
+void	Channel::partUser(User& user, Channel &channel, std::string msg)
 {
+	std::string channelName = channel.getName();
+
 	for (std::vector<User>::iterator it = _user_vector.begin(); it != _user_vector.end(); ++it)
 	{
 		if (user == *it)
@@ -202,6 +204,15 @@ void	Channel::partUser(User& user)
 			}
 		}
 	}
+
+	// Build the compliant PART message with the user's full prefix
+	// get hostname probably not necessary
+    std::string user_prefix = user.getNickName() + "!" + user.getUserName() + "@" + user.getHostName();
+    std::string part_msg = ":" + user_prefix + " PART #" + channelName + " :" + msg + "\r\n";
+
+    // Broadcast to all users in the channel (including the sender)
+    channel.writeToChannel(user, part_msg);
+    send(user.getFd(), part_msg.c_str(), part_msg.size(), 0);
 }
 
 void Channel::writeToChannel(User& user, std::string& buffer)

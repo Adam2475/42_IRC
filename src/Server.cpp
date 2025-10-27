@@ -124,8 +124,8 @@ void Server::disconnectClient(int clientSocket, std::string quitMessage)
 	{
         if (isInVector(quittingUser, it->getUserVector()))
 		{
-            it->writeToChannel(quittingUser, out);
-            it->partUser(quittingUser);
+            //it->writeToChannel(quittingUser, out);
+            it->partUser(quittingUser, *it, out);
         }
     }
 

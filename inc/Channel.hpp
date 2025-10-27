@@ -20,7 +20,7 @@ class Channel
 		bool		_invite_only;
 		bool		_topic_restriction;
 		
-		public:
+	public:
 		Channel();
 		Channel(const Channel& other);
 		Channel& operator=(const Channel& other);
@@ -37,7 +37,7 @@ class Channel
 		void	setMaxUsers(unsigned int max_users, User& user_operator);
 		void	setName(std::string& name, User& user_operator);
 		void	kickUser(User& user, User& user_operator);
-		void	partUser(User& user);
+		void	partUser(User& user, Channel &channel, std::string msg);
 		void	writeToChannel(User& user, std::string& buffer);
 		// void	inviteUser(User& user, User& user_operator);
 		// void	setTopic(std::string& passwd, User& user_operator);

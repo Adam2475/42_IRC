@@ -17,7 +17,7 @@ programma si rompe interrompendo la registrazione
 
 - [ ] add the PRIVMSG for '#channels'
 
-- add notice when user enters a channel
+- add notice when user enters a channel | !!
 
 - channel PRIVMSG not showing on konversation | OK
 
@@ -29,4 +29,6 @@ programma si rompe interrompendo la registrazione
 
 - PART and PRIVMSG not working as expected on telnet
 
-- PART cmd don't remove user from channel user list
+- PART cmd don't remove user from channel user list | OK
+
+- PRIVMSG send messages to channels even when you are not joined

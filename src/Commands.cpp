@@ -209,74 +209,6 @@ int		Server::cmdJoin(std::stringstream &oss, User user)
 	return (0);
 }
 
-// int Server::cmdPart(std::stringstream &oss, int clientSocket)
-// {
-// 	User user;
-// 	for (size_t i = 0; i < _users.size(); i++)
-// 	{
-// 		if (_users[i].getFd() == clientSocket)
-// 		{
-// 			user = _users[i];
-// 			break;
-// 		}
-// 	}
-// 	std::string token;
-// 	oss >> token;
-// 	if (token.empty())
-// 	{
-// 		pollOut(user);
-// 		std::string msg = "Command usage: PART <channel name> :<bye message>\n";
-// 		send(user.getFd(), msg.c_str(), msg.size(), 0);
-// 		pollIn(user);
-// 		return 1;
-// 	}
-// 	std::string channelName = token.substr(1, token.size() - 1);
-// 	std::vector<Channel>::iterator channelIterator = _channels.begin();
-// 	while (channelIterator != _channels.end())
-// 	{
-// 		// std::cout << "searching trough channels PART COMMAND" << std::endl;
-// 		if (channelName == channelIterator->getName())
-// 		{
-// 			// std::cout << token << " sono qui 1" << std::endl;
-// 			std::vector<User> user_vect = channelIterator->getUserVector();
-// 			if (isInVector(user, user_vect))
-// 			{
-// 				std::string bye_msg;
-// 				oss >> bye_msg;
-// 				// std::cout << bye_msg << " -> bye_msg sono qui 2" << std::endl;
-// 				if (bye_msg[0] != ':')
-// 				{
-// 					pollOut(user);
-// 					std::string msg = "Command usage: PART <channel name> :<bye message>\n";
-// 					send(user.getFd(), msg.c_str(), msg.size(), 0);
-// 					pollIn(user);
-// 					return 1;
-// 				}
-// 				bye_msg += "\r\n";
-// 				channelIterator->writeToChannel(user, bye_msg);
-// 				channelIterator->partUser(user);
-// 			}
-// 			else
-// 			{
-// 				std::cout << "sono qui 3 vect size = " << channelIterator->getUserVector().size() << std::endl;
-// 				pollOut(user);
-// 				std::string msg = "Didn't work!\n";
-// 				send(user.getFd(), msg.c_str(), msg.size(), 0);
-// 				pollIn(user);
-// 				return 1;
-// 			}
-// 			pollOut(user);
-// 			std::string msg = "You aren't part of " + channelIterator->getName() + " anymore. Goodbye!\n";
-// 			send(user.getFd(), msg.c_str(), msg.size(), 0);
-// 			pollIn(user);
-// 			break;
-// 		}
-// 		++channelIterator;
-// 	}
-// 	std::cout <<"sono qui 4" << std::endl;
-// 	return 0;
-// }
-
 int Server::cmdPart(std::stringstream &oss, int clientSocket)
 {
     User user = getUserByFd(clientSocket);
@@ -321,23 +253,15 @@ int Server::cmdPart(std::stringstream &oss, int clientSocket)
     if (!reason.empty() && reason[0] == ' ') {
         reason = reason.substr(1);
     }
-    if (!reason.empty() && reason[0] == ':') {
+    if (!reason.empty() && reason[0] == ':'){
         reason = reason.substr(1);
     } else if (reason.empty()) {
         reason = "Leaving"; // Default reason
     }
 
-    // Build the compliant PART message with the user's full prefix
-	// get hostname probably not necessary
-    std::string user_prefix = user.getNickName() + "!" + user.getUserName() + "@" + user.getHostName();
-    std::string part_msg = ":" + user_prefix + " PART #" + channelName + " :" + reason + "\r\n";
-
-    // Broadcast to all users in the channel (including the sender)
-    targetChannel->writeToChannel(user, part_msg);
-    send(user.getFd(), part_msg.c_str(), part_msg.size(), 0);
-
     // Remove the user from the channel's internal list
-    targetChannel->partUser(user);
+	// moved reply message logic to partUser()
+    targetChannel->partUser(user, *targetChannel, reason);
 
     return 0;
 }
@@ -365,34 +289,10 @@ int		Server::cmdQuit(std::stringstream &oss, int clientSocket)
     {
         if (isInVector(quittingUser, it->getUserVector()))
         {
-            it->writeToChannel(quittingUser, out);
-            it->partUser(quittingUser);
+            //it->writeToChannel(quittingUser, out);
+            it->partUser(quittingUser, *it, quit_msg);
         }
     }
-
-	// send back QUIT message to client
-	// send(clientSocket, out.c_str(), out.size(), 0);
-
-	// // remove poll fd and close socket
-    // for (size_t i = 0; i < poll_fds.size(); ++i)
-    // {
-    //     if (poll_fds[i].fd == clientSocket)
-    //     {
-    //         close(poll_fds[i].fd);
-    //         poll_fds.erase(poll_fds.begin() + i);
-    //         break;
-    //     }
-    // }
-
-    // // remove user from _users
-    // for (size_t i = 0; i < _users.size(); ++i)
-    // {
-    //     if (_users[i].getFd() == clientSocket)
-    //     {
-    //         _users.erase(_users.begin() + i);
-    //         break;
-    //     }
-    // }
 
 	disconnectClient(clientSocket, quit_msg);
 
@@ -510,7 +410,8 @@ int		Server::cmdKick(std::stringstream &oss, int clientSocket)
 		return 1;
 	}
 	Channel *targetChannel = findChannelByName(channelName);
-
+	std::string reason;
+	std::getline(oss, reason);
 	if (channelName[0] != '#' || targetChannel == NULL)
 	{
 		// ERR_NOSUCHCHANNEL (403)
@@ -539,7 +440,7 @@ int		Server::cmdKick(std::stringstream &oss, int clientSocket)
 		std::cout << "user not in channel" << std::endl;
 	}
 
-	targetChannel->partUser(targetUser);
+	targetChannel->partUser(targetUser, *targetChannel, reason);
 
 	return 0;
 }
