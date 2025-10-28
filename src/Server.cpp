@@ -288,6 +288,7 @@ void Server::accept_connections()
 					std::string received;
 					received += buffer;
 					
+					// ??
 					while (received.find_first_of("\r\n") == std::string::npos)
 					{
 						bzero(buffer, sizeof(buffer));

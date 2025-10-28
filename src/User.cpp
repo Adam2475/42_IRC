@@ -65,7 +65,8 @@ struct pollfd User::getPollFd() const
 void User::setPollFd(int clientSocket)
 {
 	_pollfd.fd = clientSocket;
-	_pollfd.events = POLLIN;
+	// setting events at pollin or pollout so poll can check both
+	_pollfd.events = POLLIN | POLLOUT;
 	_pollfd.revents = 0;
 }
 

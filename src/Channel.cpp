@@ -219,9 +219,14 @@ void Channel::writeToChannel(User& user, std::string& buffer)
 {
 	for (std::vector<User>::iterator it = _user_vector.begin(); it != _user_vector.end(); ++it)
 	{
-		pollOut(*it);
+		// pollOut(*it);
+		// if (*it->_pollfd.revents == POLLOUT)
+		// {
+		// 	std::cout << "client revents on POLLOUT" << std::endl;
+		// 	send(it->getFd(), buffer.c_str(), buffer.size(), 0);
+		// }
+		// pollIn(*it);
 		send(it->getFd(), buffer.c_str(), buffer.size(), 0);
-		pollIn(*it);
 	}
 }
 

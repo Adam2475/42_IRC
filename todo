@@ -32,3 +32,9 @@ programma si rompe interrompendo la registrazione
 - PART cmd don't remove user from channel user list | OK
 
 - PRIVMSG send messages to channels even when you are not joined
+
+- ogni call di recv dovrebbe essere preceduta da una call di POLL con un check a POLLIN
+
+- le credenziali devono essere raccolte tutte prima di chiamare userCreation
+
+- setPollIn e setPollOut sono superflue

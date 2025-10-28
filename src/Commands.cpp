@@ -115,9 +115,9 @@ int		Server::cmdPrivateMsg(std::stringstream &oss, const std::string &senderNick
 		else
 		{
 			// pollOut(_users[i]);
-			setPollOut(_users[i].getFd());
+			// setPollOut(_users[i].getFd());
 			send(_users[i].getFd(), out.c_str(), out.size(), 0);
-			setPollIn(_users[i].getFd());
+			// setPollIn(_users[i].getFd());
 			// pollIn(_users[i]);
 		}
 	}
