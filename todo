@@ -15,7 +15,7 @@ operators:
 
 programma si rompe interrompendo la registrazione
 
-- [ ] add the PRIVMSG for '#channels'
+- [ ] add the PRIVMSG for '#channels' | OK
 
 - add notice when user enters a channel | !!
 
@@ -38,3 +38,6 @@ programma si rompe interrompendo la registrazione
 - le credenziali devono essere raccolte tutte prima di chiamare userCreation
 
 - setPollIn e setPollOut sono superflue
+
+- Servers MUST be able to parse arguments of JOIN in the form of a list of target
+

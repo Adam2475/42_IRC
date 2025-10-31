@@ -124,6 +124,20 @@ int		Server::cmdPrivateMsg(std::stringstream &oss, const std::string &senderNick
     return (0);
 }
 
+// Servers MUST be able to parse arguments in the
+// form of a list of target
+
+// Once a user has joined a channel, he receives information about
+// all commands his server receives affecting the channel.  This
+// includes JOIN, MODE, KICK, PART, QUIT and of course PRIVMSG/NOTICE.
+
+// If a JOIN is successful, the user receives a JOIN message as
+// confirmation and is then sent the channel's topic (using RPL_TOPIC) and
+// the list of users who are on the channel (using RPL_NAMREPLY), which
+// MUST include the user joining.
+
+// JOIN 0 ;	Leave all currently joined
+//        	channels.
 int		Server::cmdJoin(std::stringstream &oss, User user)
 {
 	std::cout << "detected command JOIN" << std::endl;
@@ -202,10 +216,9 @@ int		Server::cmdJoin(std::stringstream &oss, User user)
 
         std::string endofnames_msg = ":server 366 " + user.getNickName() + " #" + channelName + " :End of /NAMES list.\r\n";
         send(user.getFd(), endofnames_msg.c_str(), endofnames_msg.size(), 0);
+
 	}
 	std::cout << token << std::endl;
-
-	//std::cout << oss << std::endl;
 	return (0);
 }
 

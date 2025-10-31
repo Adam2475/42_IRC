@@ -54,26 +54,26 @@ Channel::Channel(std::string& name, std::string& passwd, User& creator, std::str
 	_operators_vector.push_back(creator);
 	std::cout << "Channel " << name << " created successfully!" << std::endl;
 
-	pollOut(creator);
+	// pollOut(creator);
 	std::string msg = "Hai creato il canale: " + name + "!\n";
 	send(creator.getFd(), msg.c_str(), msg.size(), 0);
-	pollIn(creator);
+	// pollIn(creator);
 }
 
 void	Channel::addUserToChannel(User& user, std::string& passwd)
 {
 	if (!_passwd.empty() && _passwd.compare(passwd) != 0)
 	{
-		pollOut(user);
+		// pollOut(user);
 		send(user.getFd(), "Wrong password! Access to channel denied!\n", 43, 0);
-		pollIn(user);
+		// pollIn(user);
 		return ;
 	}
 	if (isInVector(user, _user_vector))
 	{
-		pollOut(user);
+		// pollOut(user);
 		send(user.getFd(), "You're already part of this channel\n", 37, 0);
-		pollIn(user);
+		// pollIn(user);
 		return ;
 	}
 	else
