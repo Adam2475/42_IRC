@@ -401,6 +401,7 @@ int		Server::cmdTopic(std::stringstream &oss, int clientSocket)
 	std::cout << "detected command TOPIC" << std::endl;
 	std::string arg2;
 	oss >> arg2;
+	User targetUser = getUserByFd(clientSocket);
 
 	if (channel_name.empty())
 	{
@@ -429,7 +430,16 @@ int		Server::cmdTopic(std::stringstream &oss, int clientSocket)
 
 	if (!arg2.empty())
 	{
-		targetChannel->setTopic(arg2);
+		if (targetChannel->isOperatorUser(targetUser))
+		{
+			std::cout << "user is operator, TOPIC operation allowed" << std::endl;
+			targetChannel->setTopic(arg2);
+		}
+		else
+		{
+			std::cout << "User is not operator, operation aborted" << std::endl;
+			return (1);
+		}
 	}
 	return (0);
 }

@@ -247,3 +247,8 @@ void Channel::addToInvited(User& user)
         _invited_users.push_back(user);
     }
 }
+
+bool	Channel::isOperatorUser(User target_user) const
+{
+	return (isInVector(target_user, _operators_vector) ? true : false);
+}

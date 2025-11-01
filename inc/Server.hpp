@@ -34,7 +34,7 @@
 	| **NOTICE**      | messaggio non auto-rispondente (es. avvisi server) | `NOTICE #chat :Server restart soon!` | -> da vedere se aggiungere
 	| **PING / PONG** | keepalive tra client e server                      | `PING irc.local` / `PONG irc.local`  | -> da vedere se aggiungere
 	| **MODE**        | cambia impostazioni di canale o utente             | `MODE #chat +i`                      |
-	| **TOPIC**       | imposta o mostra il topic del canale               | `TOPIC #chat :Benvenuti!`            |	!!
+	| **TOPIC**       | imposta o mostra il topic del canale               | `TOPIC #chat :Benvenuti!`            |	!?
 	| **KICK**        | rimuove un utente dal canale                       | `KICK #chat bob :Rule violation`     | !?
 	| **INVITE**      | invita un utente a un canale                       | `INVITE bob #chat`                   | OK
 	| **QUIT**        | disconnette l’utente                               | `QUIT :Client exiting`               | OK
