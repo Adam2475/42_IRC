@@ -4,7 +4,8 @@
 
 void    Server::setPollOut(int targetFd)
 {
- 	for (size_t i = 1; i < poll_fds.size(); i++) {
+ 	for (size_t i = 1; i < poll_fds.size(); i++)
+	{
 		if (poll_fds[i].fd == targetFd)
         {
 			poll_fds[i].events = poll_fds[i].events + POLLOUT;
@@ -16,7 +17,8 @@ void    Server::setPollOut(int targetFd)
 // clear POLLOUT by explicitly restoring the events field (here we restore to POLLIN)
 void    Server::setPollIn(int targetFd)
 {
-	for (size_t i = 1; i < poll_fds.size(); i++) {
+	for (size_t i = 1; i < poll_fds.size(); i++)
+	{
 		if (poll_fds[i].fd == targetFd)
         {
 			poll_fds[i].events = POLLIN;
@@ -29,11 +31,12 @@ int		Server::cmdPrivateMsg(std::stringstream &oss, const std::string &senderNick
 {
     std::cout << "PRIVMSG found" << std::endl;
 	std::string targetsToken;
+	size_t sender_idx = getUserIdByName(senderNick);
 
 	if (!(oss >> targetsToken) || targetsToken.empty())
 	{
-		// error: ERR_NEEDMOREPARAMS = 461,
-		std::cerr << "not enough parameters" << std::endl;
+		std::string err = ":server 461 " + senderNick + " PRIVMSG :Not enough parameters\r\n";
+		send(_users[sender_idx].getFd(), err.c_str(), err.size(), 0);
 		return (1);
 	}
 
@@ -42,17 +45,8 @@ int		Server::cmdPrivateMsg(std::stringstream &oss, const std::string &senderNick
 	std::string target;
 	std::string msgBody;
 	std::stringstream tss(targetsToken);
-	// oss >> msgBody;
-	// building message string
 	std::getline(oss, msgBody);
-	std::cout << "message body: " << msgBody << std::endl;
-	size_t sender_idx = 0;
-    for (size_t j = 0; j < _users.size(); ++j) {
-        if (_users[j].getNickName() == senderNick) {
-            sender_idx = j;
-            break;
-        }
-    }
+
 	while (std::getline(tss, target, ','))
 	{
 		bool is_channel = false;
@@ -65,7 +59,7 @@ int		Server::cmdPrivateMsg(std::stringstream &oss, const std::string &senderNick
 		if (target[0] == '#')
 		{
 			is_channel = true;
-			std::cout << "channels_no: " << _channels.size() << " i: " << i << std::endl;
+			//std::cout << "channels_no: " << _channels.size() << " i: " << i << std::endl;
 			std::string channelName = target.substr(1);
 			while (i < _channels.size())
 			{
@@ -109,17 +103,9 @@ int		Server::cmdPrivateMsg(std::stringstream &oss, const std::string &senderNick
 		std::string out = ":" + senderNick + " PRIVMSG " + target + " :" + msgBody + "\r\n";
 
 		if (is_channel)
-		{
 			_channels[i].writeToChannel(_users[sender_idx], out);
-		}
 		else
-		{
-			// pollOut(_users[i]);
-			// setPollOut(_users[i].getFd());
 			send(_users[i].getFd(), out.c_str(), out.size(), 0);
-			// setPollIn(_users[i].getFd());
-			// pollIn(_users[i]);
-		}
 	}
     return (0);
 }

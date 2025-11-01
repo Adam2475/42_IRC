@@ -113,6 +113,18 @@ Channel*	Server::findChannelByName(std::string channelName)
 	return NULL;
 }
 
+int		Server::getUserIdByName(std::string username)
+{
+	for (size_t j = 0; j < _users.size(); ++j)
+	{
+		if (_users[j].getNickName() == username)
+		{
+			return (j);
+		}
+    }
+	return (0);
+}
+
 void Server::disconnectClient(int clientSocket, std::string quitMessage)
 {
 	User quittingUser = getUserByFd(clientSocket);
@@ -354,7 +366,6 @@ void Server::accept_connections()
 					else if (word == TOPIC)
 					{
 						cmdTopic(oss, clientSocket);
-						// showChannelTopic();
 						continue;
 					}
 

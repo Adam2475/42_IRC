@@ -72,6 +72,7 @@ class Server
 		void 		accept_connections();
 		User		findUserByNick(std::string targetNick);
 		User		getUserByFd(int clientSocket);
+		int			getUserIdByName(std::string username);
 		Channel*	findChannelByName(std::string channelName);
 		void		disconnectClient(int clientSocket, std::string quitMessage);
 
