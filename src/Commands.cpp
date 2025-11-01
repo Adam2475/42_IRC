@@ -312,19 +312,6 @@ int		Server::cmdQuit(std::stringstream &oss, int clientSocket)
 	return (0);
 }
 
-Channel*	Server::findChannelByName(std::string channelName)
-{
-	Channel targetChannel;
- 	for (std::vector<Channel>::iterator it = _channels.begin(); it != _channels.end(); ++it)
-	{
-        if (it->getName() == channelName)
-		{
-            return &(*it);
-        }
-    }
-	return NULL;
-}
-
 int		Server::cmdInvite(std::stringstream &oss, int clientSocket)
 {
 	std::string targetNick;
@@ -405,6 +392,46 @@ void Server::sendNumeric(int clientSocket, int code, const std::string& arg, con
 
     std::string reply = oss.str();
     send(clientSocket, reply.c_str(), reply.size(), 0);
+}
+
+int		Server::cmdTopic(std::stringstream &oss, int clientSocket)
+{
+	std::string channel_name;
+	oss >> channel_name;
+	std::cout << "detected command TOPIC" << std::endl;
+	std::string arg2;
+	oss >> arg2;
+
+	if (channel_name.empty())
+	{
+		std::cout << "fatal error, no channel topic" << std::endl;
+		return (1);
+	}
+	std::cout << channel_name << std::endl;
+
+	if (removeInitialHash(&channel_name))
+	{
+		std::cout << "bad formatted arguments, need channel" << std::endl;
+	}
+	else
+	{
+		std::cout << "hash removed correctly" << std::endl;
+		std::cout << channel_name << std::endl;
+	}
+
+	Channel *targetChannel = findChannelByName(channel_name);
+	if (!targetChannel)
+	{
+		std::cout << "fatal error, no channel found" << std::endl;
+		exit(1);
+	}
+	targetChannel->showChannelTopic();
+
+	if (!arg2.empty())
+	{
+		targetChannel->setTopic(arg2);
+	}
+	return (0);
 }
 
 int		Server::cmdKick(std::stringstream &oss, int clientSocket)

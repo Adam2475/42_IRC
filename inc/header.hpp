@@ -35,5 +35,6 @@ int     clearStrCRFL(std::string& received);
 void    pollIn(User& user);
 void    pollOut(User& user);
 bool	isInVector(User& user, const std::vector<User>& vector);
+int     removeInitialHash(std::string *target);
 
 #endif

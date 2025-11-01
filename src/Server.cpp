@@ -1,6 +1,7 @@
 #include "../inc/header.hpp"
 #include <netdb.h>
 #include "../inc/Server.hpp"
+#include "../inc/Channel.hpp"
 
 Server::Server() {}
 
@@ -96,6 +97,20 @@ std::string Server::sendReceive(int clientSocket, std::string message)
 	}
 	std::string empty;
 	return empty;
+}
+
+Channel*	Server::findChannelByName(std::string channelName)
+{
+	Channel targetChannel;
+ 	for (std::vector<Channel>::iterator it = _channels.begin(); it != _channels.end(); ++it)
+	{
+        if (it->getName() == channelName)
+		{
+            return &(*it);
+        }
+    }
+	// channel not found
+	return NULL;
 }
 
 void Server::disconnectClient(int clientSocket, std::string quitMessage)
@@ -334,6 +349,13 @@ void Server::accept_connections()
 					else if (word == KICK)
 					{
 						cmdKick(oss, clientSocket);
+						continue;
+					}
+					else if (word == TOPIC)
+					{
+						cmdTopic(oss, clientSocket);
+						// showChannelTopic();
+						continue;
 					}
 
 					// TODO: se non ci sono comandi prima di un mess bisogna dare 421 ERR_UNKNOWNCOMMAND

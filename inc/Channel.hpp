@@ -35,12 +35,18 @@ class Channel
 		void	inviteUser(User& user, User&user_operator);
 		void	addUserToOperatorsVector(User& user, User& user_operator);
 		void	setMaxUsers(unsigned int max_users, User& user_operator);
-		void	setName(std::string& name, User& user_operator);
+		/////////////////////////////////////
+		// Channel Menagement
 		void	kickUser(User& user, User& user_operator);
 		void	partUser(User& user, Channel &channel, std::string msg);
 		void	writeToChannel(User& user, std::string& buffer);
+		void	showChannelTopic();
+		bool	isOperatorUser(User target_user) const;
 		// void	inviteUser(User& user, User& user_operator);
-		// void	setTopic(std::string& passwd, User& user_operator);
+		////////////////////////////////////
+		// Getters & Setters
+		void		setName(std::string& name, User& user_operator);
+		void		setTopic(std::string topic);
 		std::string	getTopic() const;
 		// void	removeTopicRestriction(User& user_operator);
 		// void	removeTopic(User& user_operator);

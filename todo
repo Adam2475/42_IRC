@@ -41,3 +41,5 @@ programma si rompe interrompendo la registrazione
 
 - Servers MUST be able to parse arguments of JOIN in the form of a list of target
 
+- add check for channel admin to set TOPIC command
+
