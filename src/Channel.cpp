@@ -45,6 +45,11 @@ std::string Channel::getName() const
 	return _name;
 }
 
+bool 	Channel::getInviteOnly() const
+{
+	return _invite_only;
+}
+
 Channel::Channel(std::string& name, std::string& passwd, User& creator, std::string& topic
 	, unsigned int max_users, bool invite_only, bool topic_restriction) : 
 	_name(name), _passwd(passwd), _topic(topic), _max_users(max_users)

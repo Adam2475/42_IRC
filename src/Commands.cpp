@@ -167,6 +167,12 @@ int		Server::cmdJoin(std::stringstream &oss, User user)
 		std::cout << "searching trough channels" << std::endl;
 		if (channelName == channelIterator->getName())
 		{
+			if (channelIterator->getInviteOnly())
+			{
+				// ERR_INVITEONLYCHAN (473)
+				// esempio mess: ":irc.example.com 473 Mario #secret :Cannot join channel (+i)"
+				return 1;
+			}
 			std::cout << "channel found" << std::endl;
             channelIterator->addUserToChannel(user, pass);
             

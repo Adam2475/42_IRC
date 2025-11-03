@@ -31,6 +31,7 @@ class Channel
 		std::vector<User> getUserVector() const;
 		std::vector<User> getUserOperatorsVector() const;
 		std::string getName() const;
+		bool 	getInviteOnly() const;
 		void	addUserToChannel(User& user, std::string& passwd);
 		void	inviteUser(User& user, User&user_operator);
 		void	addUserToOperatorsVector(User& user, User& user_operator);
