@@ -5,7 +5,7 @@ CC = c++
 CFLAGS = -std=c++98
 
 SRCS = ./src/main.cpp ./src/Server.cpp ./src/User.cpp ./src/Channel.cpp \
-			./src/header.cpp ./src/Commands.cpp
+			./src/header.cpp ./src/Commands.cpp ./src/Utils.cpp
 
 OBJS = $(SRCS:.cpp=.o)
 

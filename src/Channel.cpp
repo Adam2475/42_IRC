@@ -1,14 +1,10 @@
 #include "../inc/Channel.hpp"
 
-Channel::Channel()
-{
-}
+Channel::Channel() {}
 
 //TODO: aggiungere nuovi membri privati nel copy e assignment operator
 Channel::Channel(const Channel& other) : _name(other._name), _user_vector(other._user_vector), 
-_operators_vector(other._operators_vector), _passwd(other._passwd), _topic(other._topic), _max_users(other._max_users)
-{
-}
+_operators_vector(other._operators_vector), _passwd(other._passwd), _topic(other._topic), _max_users(other._max_users) {}
 
 Channel& Channel::operator=(const Channel& other)
 {
@@ -24,9 +20,7 @@ Channel& Channel::operator=(const Channel& other)
 	return *this;
 }
 
-Channel::~Channel()
-{
-}
+Channel::~Channel() {}
 
 std::vector<User> Channel::getUserVector() const
 {
@@ -113,6 +107,12 @@ void	Channel::inviteUser(User& user, User&user_operator)
 			RPL_ENDOFNAMES.
 	 */
 	
+}
+
+void	Channel::showChannelTopic()
+{
+	std::string topic = getTopic();
+	std::cout << topic << std::endl;
 }
 
 void	Channel::addUserToOperatorsVector(User& user, User& user_operator)
@@ -240,10 +240,20 @@ std::string	Channel::getTopic() const
 	return _topic;
 }
 
+void	Channel::setTopic(std::string topic)
+{
+	_topic = topic;  
+}
+
 void Channel::addToInvited(User& user)
 {
     if (!isInVector(user, _invited_users))
     {
         _invited_users.push_back(user);
     }
+}
+
+bool	Channel::isOperatorUser(User target_user) const
+{
+	return (isInVector(target_user, _operators_vector) ? true : false);
 }

@@ -4,7 +4,8 @@
 
 void    Server::setPollOut(int targetFd)
 {
- 	for (size_t i = 1; i < poll_fds.size(); i++) {
+ 	for (size_t i = 1; i < poll_fds.size(); i++)
+	{
 		if (poll_fds[i].fd == targetFd)
         {
 			poll_fds[i].events = poll_fds[i].events + POLLOUT;
@@ -16,7 +17,8 @@ void    Server::setPollOut(int targetFd)
 // clear POLLOUT by explicitly restoring the events field (here we restore to POLLIN)
 void    Server::setPollIn(int targetFd)
 {
-	for (size_t i = 1; i < poll_fds.size(); i++) {
+	for (size_t i = 1; i < poll_fds.size(); i++)
+	{
 		if (poll_fds[i].fd == targetFd)
         {
 			poll_fds[i].events = POLLIN;
@@ -29,11 +31,12 @@ int		Server::cmdPrivateMsg(std::stringstream &oss, const std::string &senderNick
 {
     std::cout << "PRIVMSG found" << std::endl;
 	std::string targetsToken;
+	size_t sender_idx = getUserIdByName(senderNick);
 
 	if (!(oss >> targetsToken) || targetsToken.empty())
 	{
-		// error: ERR_NEEDMOREPARAMS = 461,
-		std::cerr << "not enough parameters" << std::endl;
+		std::string err = ":server 461 " + senderNick + " PRIVMSG :Not enough parameters\r\n";
+		send(_users[sender_idx].getFd(), err.c_str(), err.size(), 0);
 		return (1);
 	}
 
@@ -42,17 +45,8 @@ int		Server::cmdPrivateMsg(std::stringstream &oss, const std::string &senderNick
 	std::string target;
 	std::string msgBody;
 	std::stringstream tss(targetsToken);
-	// oss >> msgBody;
-	// building message string
 	std::getline(oss, msgBody);
-	std::cout << "message body: " << msgBody << std::endl;
-	size_t sender_idx = 0;
-    for (size_t j = 0; j < _users.size(); ++j) {
-        if (_users[j].getNickName() == senderNick) {
-            sender_idx = j;
-            break;
-        }
-    }
+
 	while (std::getline(tss, target, ','))
 	{
 		bool is_channel = false;
@@ -65,7 +59,7 @@ int		Server::cmdPrivateMsg(std::stringstream &oss, const std::string &senderNick
 		if (target[0] == '#')
 		{
 			is_channel = true;
-			std::cout << "channels_no: " << _channels.size() << " i: " << i << std::endl;
+			//std::cout << "channels_no: " << _channels.size() << " i: " << i << std::endl;
 			std::string channelName = target.substr(1);
 			while (i < _channels.size())
 			{
@@ -109,17 +103,9 @@ int		Server::cmdPrivateMsg(std::stringstream &oss, const std::string &senderNick
 		std::string out = ":" + senderNick + " PRIVMSG " + target + " :" + msgBody + "\r\n";
 
 		if (is_channel)
-		{
 			_channels[i].writeToChannel(_users[sender_idx], out);
-		}
 		else
-		{
-			// pollOut(_users[i]);
-			// setPollOut(_users[i].getFd());
 			send(_users[i].getFd(), out.c_str(), out.size(), 0);
-			// setPollIn(_users[i].getFd());
-			// pollIn(_users[i]);
-		}
 	}
     return (0);
 }
@@ -318,19 +304,6 @@ int		Server::cmdQuit(std::stringstream &oss, int clientSocket)
 	return (0);
 }
 
-Channel*	Server::findChannelByName(std::string channelName)
-{
-	Channel targetChannel;
- 	for (std::vector<Channel>::iterator it = _channels.begin(); it != _channels.end(); ++it)
-	{
-        if (it->getName() == channelName)
-		{
-            return &(*it);
-        }
-    }
-	return NULL;
-}
-
 int		Server::cmdInvite(std::stringstream &oss, int clientSocket)
 {
 	std::string targetNick;
@@ -411,6 +384,56 @@ void Server::sendNumeric(int clientSocket, int code, const std::string& arg, con
 
     std::string reply = oss.str();
     send(clientSocket, reply.c_str(), reply.size(), 0);
+}
+
+int		Server::cmdTopic(std::stringstream &oss, int clientSocket)
+{
+	std::string channel_name;
+	oss >> channel_name;
+	std::cout << "detected command TOPIC" << std::endl;
+	std::string arg2;
+	oss >> arg2;
+	User targetUser = getUserByFd(clientSocket);
+
+	if (channel_name.empty())
+	{
+		std::cout << "fatal error, no channel topic" << std::endl;
+		return (1);
+	}
+	std::cout << channel_name << std::endl;
+
+	if (removeInitialHash(&channel_name))
+	{
+		std::cout << "bad formatted arguments, need channel" << std::endl;
+	}
+	else
+	{
+		std::cout << "hash removed correctly" << std::endl;
+		std::cout << channel_name << std::endl;
+	}
+
+	Channel *targetChannel = findChannelByName(channel_name);
+	if (!targetChannel)
+	{
+		std::cout << "fatal error, no channel found" << std::endl;
+		exit(1);
+	}
+	targetChannel->showChannelTopic();
+
+	if (!arg2.empty())
+	{
+		if (targetChannel->isOperatorUser(targetUser))
+		{
+			std::cout << "user is operator, TOPIC operation allowed" << std::endl;
+			targetChannel->setTopic(arg2);
+		}
+		else
+		{
+			std::cout << "User is not operator, operation aborted" << std::endl;
+			return (1);
+		}
+	}
+	return (0);
 }
 
 int		Server::cmdKick(std::stringstream &oss, int clientSocket)

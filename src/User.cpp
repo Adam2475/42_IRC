@@ -1,10 +1,10 @@
 #include "../inc/User.hpp"
 
+//////////////////////////////////
 // Constructors and Distructors
+//////////////////////////////////
 
-User::User()
-{
-}
+User::User() {}
 
 User::User(std::string& userName, std::string& nickName, int clientSocket, const std::string &hostname) : _userName(userName), _nickName(nickName), _clientSocket(clientSocket), _hostname(hostname)
 {
@@ -29,11 +29,11 @@ User& User::operator=(const User& other)
 	return *this;
 }
 
-User::~User()
-{
-}
+User::~User() {}
 
-// Getter and Setters
+///////////////////////////
+// Getters and Setters
+///////////////////////////
 
 std::string	User::getUserName() const
 {
@@ -65,7 +65,6 @@ struct pollfd User::getPollFd() const
 void User::setPollFd(int clientSocket)
 {
 	_pollfd.fd = clientSocket;
-	// setting events at pollin or pollout so poll can check both
 	_pollfd.events = POLLIN | POLLOUT;
 	_pollfd.revents = 0;
 }
@@ -85,7 +84,9 @@ void User::setFd(int clientSocket)
 	_clientSocket = clientSocket;
 }
 
+////////////////////////
 // Operators overload
+////////////////////////
 
 bool User::operator==(const User& other) const
 {
@@ -102,3 +103,9 @@ bool User::operator!=(const User& other)
 }
 
 // member functions
+
+// void	setTopic(User& user_operator)
+// {
+// 	if (user_operator.u)
+// 	thi
+// }
