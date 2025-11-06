@@ -13,6 +13,7 @@
 #define QUIT "QUIT"
 #define KICK "KICK"
 #define TOPIC "TOPIC"
+#define MODE "MODE"
 #include "Channel.hpp"
 
 /**
@@ -97,6 +98,7 @@ class Server
 		int		cmdQuit(std::stringstream &oss, int clientSocket);
 		int		cmdKick(std::stringstream &oss, int clientSocket);
 		int		cmdTopic(std::stringstream &oss, int clientSocket);
+		int		cmdMode(std::stringstream &oss, int clientSocket);
 };
 
 

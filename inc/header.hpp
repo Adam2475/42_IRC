@@ -18,6 +18,7 @@
 #include <strings.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include <netinet/in.h> // for sockaddr_in struct
 #include <arpa/inet.h> // htons & htonl
@@ -36,5 +37,6 @@ void    pollIn(User& user);
 void    pollOut(User& user);
 bool	isInVector(User& user, const std::vector<User>& vector);
 int     removeInitialHash(std::string *target);
+bool channel_error_check(Channel* targetChannel, User& targetUser, std::string& arg2);
 
 #endif

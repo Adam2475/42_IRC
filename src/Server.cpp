@@ -122,7 +122,7 @@ int		Server::getUserIdByName(std::string username)
 			return (j);
 		}
     }
-	return (0);
+	return (-1);
 }
 
 void Server::disconnectClient(int clientSocket, std::string quitMessage)
@@ -364,6 +364,11 @@ void Server::accept_connections()
 						continue;
 					}
 					else if (word == TOPIC)
+					{
+						cmdTopic(oss, clientSocket);
+						continue;
+					}
+					else if (word == MODE)
 					{
 						cmdTopic(oss, clientSocket);
 						continue;

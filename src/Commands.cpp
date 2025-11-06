@@ -32,6 +32,11 @@ int		Server::cmdPrivateMsg(std::stringstream &oss, const std::string &senderNick
     std::cout << "PRIVMSG found" << std::endl;
 	std::string targetsToken;
 	size_t sender_idx = getUserIdByName(senderNick);
+	if( sender_idx == -1)
+	{
+		std::cout << "user not found" << std::endl;
+		return 1;
+	}
 
 	if (!(oss >> targetsToken) || targetsToken.empty())
 	{
@@ -485,4 +490,98 @@ int		Server::cmdKick(std::stringstream &oss, int clientSocket)
 	targetChannel->partUser(targetUser, *targetChannel, reason);
 
 	return 0;
+}
+
+int		Server::cmdMode(std::stringstream &oss, int clientSocket)
+{
+	std::string channel_name;
+	oss >> channel_name;
+	std::cout << "detected command MODE" << std::endl;
+	std::string arg2;
+	oss >> arg2;
+	User targetUser = getUserByFd(clientSocket);
+
+	if (channel_name.empty())
+	{
+		std::cout << "fatal error, no channel detected" << std::endl;
+		return (1);
+	}
+	std::cout << channel_name << std::endl;
+
+	if (removeInitialHash(&channel_name))
+	{
+		std::cout << "bad formatted arguments, need channel" << std::endl;
+	}
+	else
+	{
+		std::cout << "hash removed correctly" << std::endl;
+		std::cout << channel_name << std::endl;
+	}
+	Channel *targetChannel = findChannelByName(channel_name);
+	if (channel_error_check(targetChannel, targetUser, arg2))
+		return 1;
+	switch (arg2[1])
+	{
+	case 'i':
+		targetChannel->modeInvite(arg2);
+	break;
+	case 'k':
+		targetChannel->modePassword(oss, arg2);
+	break;
+	case 'l':
+	{
+		std::string number;
+		oss >> number;
+		if (number.find_first_not_of("0123456789") != std::string::npos && arg2[0] == '+')
+		{
+			// ERR_INVALIDMODEPARAM (696)
+			std::cout << "MODE +/- l accepts only digits" << std::endl;
+			return 1;
+		}
+		targetChannel->modeMaxUsers(oss, arg2);
+	}
+	break;
+	case 'o':
+	{
+		std::string userNick;
+		oss >> userNick;
+		if (userNick.empty())
+		{
+			// ERR_INVALIDMODEPARAM (696)
+			std::cout << "bad param to MODE" << std::endl;
+			return 1;
+		}
+		int i =  getUserIdByName(userNick);
+		if (i == -1)
+		{
+			std::cout << "user dosn't exist" << std::endl;
+			return 1;
+		}
+		targetChannel->modeOperator(oss, _users[i], arg2);
+	}
+	break;
+	// TODO : topic mode
+	case 't':
+		targetChannel->modeTopic(arg2);
+	break;
+	
+	default:
+		break;
+	}
+
+	// TODO: messaggio di conferma es. ":Nick!user@host MODE #test +i"
+	
+	/**
+	 *	
+	 	MODE #chat +i            → channel invite-only
+		MODE #chat +t            → solo operatori possono cambiare topic
+		MODE #chat +k password   → imposta password (key)
+		MODE #chat +l 25         → limite massimo 25 utenti
+		MODE #chat -k            → rimuove password
+		MODE #chat -i            → rimuove invite-only
+		MODE #chat +o NickName   → dà op a un utente
+		MODE #chat -o NickName   → rimuove op
+		MODE #chat +o Nick -t +k mypass  → puoi concatenare mode
+	 */
+
 }

@@ -1,6 +1,10 @@
 #include "../inc/Channel.hpp"
 
-Channel::Channel() {}
+Channel::Channel() {
+	_max_users = -1;
+	_topic = false;
+	_invite_only = false;
+}
 
 //TODO: aggiungere nuovi membri privati nel copy e assignment operator
 Channel::Channel(const Channel& other) : _name(other._name), _user_vector(other._user_vector), 
@@ -45,7 +49,7 @@ bool 	Channel::getInviteOnly() const
 }
 
 Channel::Channel(std::string& name, std::string& passwd, User& creator, std::string& topic
-	, unsigned int max_users, bool invite_only, bool topic_restriction) : 
+	, size_t max_users, bool invite_only, bool topic_restriction) : 
 	_name(name), _passwd(passwd), _topic(topic), _max_users(max_users)
 	, _invite_only(invite_only), _topic_restriction(topic_restriction)
 {
@@ -131,7 +135,7 @@ void	Channel::addUserToOperatorsVector(User& user, User& user_operator)
 		_operators_vector.push_back(user);
 }
 
-void	Channel::setMaxUsers(unsigned int max_users, User& user_operator)
+void	Channel::setMaxUsers(size_t max_users, User& user_operator)
 {
 	if (!isInVector(user_operator, _operators_vector))
 	{
