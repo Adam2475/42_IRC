@@ -45,3 +45,5 @@ programma si rompe interrompendo la registrazione
 
 - add reply messages to TOPIC
 
+- [ ]   provare i vari MODE con debug e aggiungere i 
+        mess formattati di conferma e errore per konversation

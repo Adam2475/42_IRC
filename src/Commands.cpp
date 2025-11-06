@@ -512,39 +512,30 @@ int		Server::cmdMode(std::stringstream &oss, int clientSocket)
 	{
 		std::cout << "bad formatted arguments, need channel" << std::endl;
 	}
-	else
-	{
-		std::cout << "hash removed correctly" << std::endl;
-		std::cout << channel_name << std::endl;
-	}
 	Channel *targetChannel = findChannelByName(channel_name);
 	if (channel_error_check(targetChannel, targetUser, arg2))
 		return 1;
-	switch (arg2[1])
-	{
-	case 'i':
+	if (arg2[1] == 'i')
 		targetChannel->modeInvite(arg2);
-	break;
-	case 'k':
+	else if (arg2[1] == 'k')
 		targetChannel->modePassword(oss, arg2);
-	break;
-	case 'l':
+	else if (arg2[1] == 'l')
 	{
 		std::string number;
 		oss >> number;
 		if (number.find_first_not_of("0123456789") != std::string::npos && arg2[0] == '+')
 		{
 			// ERR_INVALIDMODEPARAM (696)
-			std::cout << "MODE +/- l accepts only digits" << std::endl;
+			std::cout << RED << "MODE +/- l accepts only digits" << RESET << std::endl;
 			return 1;
 		}
 		targetChannel->modeMaxUsers(oss, arg2);
 	}
-	break;
-	case 'o':
+	else if (arg2[1] == 'o')
 	{
 		std::string userNick;
 		oss >> userNick;
+		std::cout << CYAN << "entered mode +/- o - userNick : " << userNick << RESET << std::endl;
 		if (userNick.empty())
 		{
 			// ERR_INVALIDMODEPARAM (696)
@@ -559,16 +550,9 @@ int		Server::cmdMode(std::stringstream &oss, int clientSocket)
 		}
 		targetChannel->modeOperator(oss, _users[i], arg2);
 	}
-	break;
-	// TODO : topic mode
-	case 't':
-		targetChannel->modeTopic(arg2);
-	break;
-	
-	default:
-		break;
-	}
-
+	else if (arg2[1] == 't')
+		targetChannel->modeTopic(oss, arg2);
+	return 0;
 	// TODO: messaggio di conferma es. ":Nick!user@host MODE #test +i"
 	
 	/**

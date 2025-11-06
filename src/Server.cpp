@@ -370,7 +370,7 @@ void Server::accept_connections()
 					}
 					else if (word == MODE)
 					{
-						cmdTopic(oss, clientSocket);
+						cmdMode(oss, clientSocket);
 						continue;
 					}
 

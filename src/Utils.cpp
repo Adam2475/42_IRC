@@ -26,8 +26,11 @@ bool channel_error_check(Channel* targetChannel, User& targetUser, std::string& 
 		return 1;
 	}
 	std::string mode[10] = {"+i", "-i", "+k", "-k", "+o", "-o", "+l", "-l", "+t", "-t"};
-	if (mode->find(arg2) == std::string::npos)
+	if (std::find(mode, mode+10, arg2) == mode + 10)
+	{
+		std::cout << RED << "mode not found" << RESET << std::endl;
 		return 1;
+	}
 	if (!targetChannel)
 	{
 		// ERR_NOSUCHCHANNEL (403)
@@ -44,6 +47,7 @@ bool channel_error_check(Channel* targetChannel, User& targetUser, std::string& 
 	}
 	if (!isInVector(targetUser, targetChannel->getUserOperatorsVector()))
 	{
+		std::cout << "nickname dello user: " << targetUser.getNickName() << std::endl;
 		// ERR_CHANOPRIVSNEEDED (482)
 		std::cout << "not a channel operator" << std::endl;
 		return 1;

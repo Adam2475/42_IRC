@@ -15,8 +15,7 @@ class Channel
 		// list of invited users
 		std::vector<User> _invited_users;
 
-		// MODE
-		// TODO: da settare a false al costruttore
+		// MODE necessities
 		bool		_invite_only;
 		bool		_topic_restriction;
 		
@@ -66,107 +65,7 @@ class Channel
 		void modePassword(std::stringstream& oss, std::string& arg);
 		void modeMaxUsers(std::stringstream& oss, std::string& arg);
 		void modeOperator(std::stringstream& oss, User& user, std::string& arg);
-		void modeTopic(std::string& arg);
+		void modeTopic(std::stringstream& oss, std::string& arg);
 };
-
-void	Channel::setPassword(std::string &pass)
-{
-	_passwd = pass;
-}
-
-void	Channel::setMaxUsers(size_t num)
-{
-	_max_users = num;
-}
-
-void	Channel::setInviteOnly(bool set)
-{
-	_invite_only = set;
-}
-
-void	Channel::removeUserFromVector(User& user, std::vector<User>& vector)
-{
-	std::vector<User>::const_iterator it = vector.begin();
-	for (it; it != vector.end(); ++it)
-	{
-		if (*it == user)
-			vector.erase(it);
-	}
-}
-
-void Channel::modeInvite(std::string &arg)
-{
-	if (arg[0] == '+')
-		setInviteOnly(true);
-	else if (arg[0] == '-')
-		setInviteOnly(false);
-}
-
-void Channel::modePassword(std::stringstream& oss, std::string& arg)
-{
-	std::string str;
-	if (arg[0] == '-')
-	{
-		setPassword(str);
-		return ;
-	}
-	else if (arg[0] == '+')
-	{
-		oss >> str;
-		setPassword(str);
-	}
-}
-
-void Channel::modeMaxUsers(std::stringstream& oss, std::string& arg)
-{
-	if (arg[0] == '-')
-	{
-		setMaxUsers(-1);
-		return ;
-	}
-	if (arg[0] == '+')
-	{
-		std::string str;
-		oss >> str;
-		int num =  std::atoi(str.c_str());
-		setMaxUsers(num);
-	}
-}
-
-void Channel::modeOperator(std::stringstream& oss, User& user, std::string& arg)
-{
-	if (arg[0] == '-')
-	{
-		if (!isInVector(user, _user_vector))
-		{
-			// ERR_USERNOTINCHANNEL (441)
-			std::cout << "user not in channel" << std::endl;
-			return ;
-		}
-		if (!isInVector(user, _operators_vector))
-		{
-			// ERR_CHANOPRIVSNEEDED (482)
-			std::cout << "cannot apply mode: user is not an operator" << std::endl;
-			return ;
-		}
-		removeUserFromVector(user, _operators_vector);
-	}
-	if (arg[0] == '+')
-	{
-		if (!isInVector(user, _user_vector))
-		{
-			// ERR_USERNOTINCHANNEL (441)
-			std::cout << "user not in channel" << std::endl;
-			return ;
-		}
-		if (isInVector(user, _operators_vector))
-		{
-			// ERR_CHANOPRIVSNEEDED (482)
-			std::cout << "cannot apply mode: user is already an operator" << std::endl;
-			return ;
-		}
-		_operators_vector.push_back(user);
-	}
-}
 
 #endif
