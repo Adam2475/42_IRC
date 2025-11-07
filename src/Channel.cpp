@@ -244,6 +244,11 @@ std::string	Channel::getTopic() const
 	return _topic;
 }
 
+std::vector<User> Channel::getInvitedUsersVector() const
+{
+	return _invited_users;
+}
+
 void	Channel::setTopic(std::string topic)
 {
 	_topic = topic;  
@@ -339,7 +344,7 @@ void Channel::modeOperator(std::stringstream& oss, User& user, std::string& arg)
 	}
 	if (arg[0] == '+')
 	{
-		std::cout << YELLOW << user.getNickName() << RESET << std::endl;
+		std::cout << YELLOW << user.getNickName() << ' ' << user.getFd() << RESET << std::endl;
 		if (!isInVector(user, _user_vector))
 		{
 			// ERR_USERNOTINCHANNEL (441)
@@ -363,7 +368,9 @@ void Channel::modeTopic(std::stringstream& oss, std::string& arg)
 	if (arg[0] == '+')
 	{
 		std::string tmp;
-		oss >> tmp;
+		std::string tmp_2;
+		while (oss >> tmp)
+			tmp_2 += tmp + ' ';
 		if (isStrNotPrintable(tmp.c_str()))
 		{
 			std::cout << "not a printable topic" << std::endl;

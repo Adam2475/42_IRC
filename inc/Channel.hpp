@@ -44,6 +44,7 @@ class Channel
 		// Getters & Setters
 
 		std::vector<User> getUserVector() const;
+		std::vector<User> getInvitedUsersVector() const;
 		std::vector<User> getUserOperatorsVector() const;
 		std::string getName() const;
 		std::string	getTopic() const;

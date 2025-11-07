@@ -47,3 +47,5 @@ programma si rompe interrompendo la registrazione
 
 - [ ]   provare i vari MODE con debug e aggiungere i 
         mess formattati di conferma e errore per konversation
+
+- [ ] fare check sui nickname: devono essere tutti diversi

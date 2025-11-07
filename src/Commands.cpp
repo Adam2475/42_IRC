@@ -129,6 +129,21 @@ int		Server::cmdPrivateMsg(std::stringstream &oss, const std::string &senderNick
 
 // JOIN 0 ;	Leave all currently joined
 //        	channels.
+
+void printUsers(const std::vector<User>& users)
+{
+    std::cout << "---- Users in vector ----\n";
+    for (size_t i = 0; i < users.size(); ++i)
+    {
+        std::cout << "User " << i
+                  << " | Nick: " << users[i].getNickName()
+                  << " | FD: "   << users[i].getFd()
+                  << "\n";
+    }
+    std::cout << "------------------------\n";
+}
+
+
 int		Server::cmdJoin(std::stringstream &oss, User user)
 {
 	std::cout << "detected command JOIN" << std::endl;
@@ -160,9 +175,19 @@ int		Server::cmdJoin(std::stringstream &oss, User user)
 		{
 			if (channelIterator->getInviteOnly())
 			{
-				// ERR_INVITEONLYCHAN (473)
-				// esempio mess: ":irc.example.com 473 Mario #secret :Cannot join channel (+i)"
-				return 1;
+				std::vector<User>::iterator x = std::find(channelIterator->getInvitedUsersVector().begin(), channelIterator->getInvitedUsersVector().end(), user);
+				if (x == channelIterator->getInvitedUsersVector().end())
+				{
+					std::cout << YELLOW;
+					printUsers(channelIterator->getInvitedUsersVector());
+					std::cout << MAGENTA << x->getNickName() << " " << x->getFd() << RESET << std::endl;
+					// ERR_INVITEONLYCHAN (473)
+					// esempio mess: ":irc.example.com 473 Mario #secret :Cannot join channel (+i)"
+					std::cout << RED << user.getNickName() << " cannot join channel: invite only restriction" << RESET << std::endl;
+					return 1;
+				}
+				else
+					std::cout << BLUE << user.getNickName() << " joined channel with restriction" << RESET << std::endl;
 			}
 			std::cout << "channel found" << std::endl;
             channelIterator->addUserToChannel(user, pass);
